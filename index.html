@@ -18,10 +18,11 @@
   .badge { position:absolute; top:-4px; right:-6px; background:var(--red); color:#fff; border-radius:50%; font-size:11px; min-width:18px; height:18px; line-height:18px; text-align:center; font-weight:bold; display:none; }
   .pill { background:var(--gold); color:#2a1606; border:0; border-radius:20px; padding:8px 12px; font-weight:bold; font-size:13px; }
 
-  /* Hero */
-  .hero { position:relative; margin:12px; border-radius:20px; overflow:hidden; min-height:230px; background:linear-gradient(120deg,#2a0d08 0%,#5a1a0c 45%,#1a0606 100%); border:1px solid rgba(245,185,66,.3); }
-  .hero img.bg { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; opacity:.55; }
-  .hero .txt { position:relative; padding:24px 18px; max-width:70%; }
+  /* Hero: theatre background, darker on the left so text stays readable */
+  .hero { position:relative; margin:12px; border-radius:20px; overflow:hidden; min-height:300px; background:#1a0b0b url('theatre.png') center center/cover no-repeat; border:1px solid rgba(245,185,66,.3); }
+  .hero::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(14,6,6,.8) 0%, rgba(14,6,6,.35) 50%, rgba(14,6,6,0) 100%); }
+  .hero img.pic { position:absolute; right:0; bottom:0; height:92%; max-width:45%; object-fit:contain; z-index:1; }
+  .hero .txt { position:relative; z-index:2; padding:24px 18px; max-width:60%; text-shadow:0 2px 8px rgba(0,0,0,.7); }
   .hero h1 { margin:0; font-size:28px; line-height:1.15; color:var(--text); font-weight:700; }
   .hero h1 span { color:var(--gold); display:block; font-size:34px; font-weight:900; }
   .hero p { color:#f1e2cc; font-size:14px; margin:10px 0 16px; }
@@ -110,12 +111,12 @@
 </header>
 
 <section class="hero">
-  <img class="bg" src="hero.png" alt="" onerror="this.style.display='none'">
   <div class="txt">
     <h1>Enjoy the Movie...<span>With Great Snacks!</span></h1>
     <p>Order your favourite snacks easily at Shafaz Grand Canteen.</p>
     <a class="cta" href="#menu-top">Order Now &rarr;</a>
   </div>
+  <img class="pic" src="hero.png" alt="" onerror="this.style.display='none'">
 </section>
 
 <div class="title" id="menu-top">Our Categories</div>
@@ -197,7 +198,6 @@ onSnapshot(collection(db, 'products'), (snap) => {
 
 function stockClass(s) { return s === 0 ? 'out' : (s <= 5 ? 'low' : ''); }
 function stockText(s) { return s === 0 ? 'Sold Out' : (s === 1 ? '1 left' : s + ' left'); }
-function cartCount() { return Object.values(cart).reduce((a, b) => a + b, 0); }
 
 // Category row: each card jumps to its section, shows the lowest price
 function renderCategories() {
