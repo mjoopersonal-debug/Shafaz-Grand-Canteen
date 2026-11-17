@@ -5,6 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#0E0606">
 <title>Shafaz Grand Canteen</title>
+<link id="favicon" rel="icon" type="image/png" href="shafaz-logo.png">
+<script>
+// Makes a round favicon from the logo's left part (reel, clapper, popcorn)
+(function () {
+  var img = new Image();
+  img.onload = function () {
+    var s = 128;
+    var c = document.createElement('canvas');
+    c.width = s; c.height = s;
+    var g = c.getContext('2d');
+    g.beginPath(); g.arc(s / 2, s / 2, s / 2, 0, Math.PI * 2);
+    g.fillStyle = '#0E0606'; g.fill();
+    g.save();
+    g.beginPath(); g.arc(s / 2, s / 2, s / 2, 0, Math.PI * 2); g.clip();
+    var side = img.height;
+    g.drawImage(img, 0, 0, side, side, s * 0.08, s * 0.08, s * 0.84, s * 0.84);
+    g.restore();
+    document.getElementById('favicon').href = c.toDataURL('image/png');
+  };
+  img.src = 'shafaz-logo.png';
+})();
+</script>
 <style>
   :root { --bg:#0E0606; --panel:#1A0B0B; --gold:#F5B942; --gold2:#FFD76A; --red:#E0352B; --green:#3DDC84; --text:#FFF6E6; --muted:#BFA892; }
   * { box-sizing:border-box; }
@@ -12,7 +34,7 @@
 
   /* Header */
   .top { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:rgba(14,6,6,.92); border-bottom:1px solid rgba(245,185,66,.25); position:sticky; top:0; z-index:8; }
-  .top img { height:52px; }
+  .top img { height:56px; width:auto; }
   .top .right { display:flex; align-items:center; gap:10px; }
   .cartbtn { position:relative; background:none; border:0; color:var(--gold); font-size:22px; padding:4px; cursor:pointer; }
   .badge { position:absolute; top:-4px; right:-6px; background:var(--red); color:#fff; border-radius:50%; font-size:11px; min-width:18px; height:18px; line-height:18px; text-align:center; font-weight:bold; display:none; }
@@ -103,7 +125,7 @@
 <body>
 
 <header class="top">
-  <img src="logo.png" alt="Shafaz Grand">
+  <img src="shafaz-logo.png" alt="Shafaz Canteen">
   <div class="right">
     <button class="cartbtn" id="cartIcon" title="Cart">&#128722;<span class="badge" id="cartBadge">0</span></button>
     <button class="pill" id="topCart">View cart</button>
@@ -206,7 +228,7 @@ function renderCategories() {
     const first = items.find(p => p.photo) || {};
     const minPrice = items.length ? Math.min(...items.map(p => Number(p.price) || 0)) : null;
     return `<a class="catcard" href="#sec-${slug(sec)}">
-      <img src="${first.photo || 'logo.png'}" alt="">
+      <img src="${first.photo || 'shafaz-logo.png'}" alt="">
       <div class="n">${esc(sec)}</div>
       <div class="f">${minPrice !== null ? 'From ₹' + minPrice : 'Coming soon'}</div>
     </a>`;
