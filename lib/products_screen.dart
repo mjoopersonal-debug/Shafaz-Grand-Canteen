@@ -7,7 +7,7 @@ import 'main.dart' show gold, mutedCol, textCol, redAccent;
 import 'orders_screen.dart' show bytesFrom;
 
 // Must match the sections on the customer website exactly
-const sections = ['Cold Drinks', 'Snacks', 'Puffs & Veg', 'Lays (Chips)', 'Carbonated Drinks', 'Popcorn'];
+const sections = ['Cold Drinks', 'Hot Snacks', 'Lays (Chips)', 'Carbonated Drinks', 'Popcorn'];
 
 String _sortKey(QueryDocumentSnapshot d) {
   final m = d.data() as Map<String, dynamic>;
