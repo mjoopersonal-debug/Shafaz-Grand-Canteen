@@ -206,7 +206,14 @@ import { getFirestore, collection, doc, onSnapshot, addDoc, runTransaction, serv
 import { firebaseConfig } from "./firebase-config.js";
 
 const db = getFirestore(initializeApp(firebaseConfig));
-const SECTIONS = ['Cold Drinks', 'Snacks', 'Puffs & Veg', 'Lays (Chips)', 'Carbonated Drinks', 'Popcorn'];
+const SECTIONS = ['Cold Drinks', 'Hot Snacks', 'Lays (Chips)', 'Carbonated Drinks', 'Popcorn'];
+const CAT_IMAGES = {
+  'Cold Drinks': 'cat-cold-drinks.png',
+  'Hot Snacks': 'cat-snacks.png',
+  'Lays (Chips)': 'cat-lays.png',
+  'Carbonated Drinks': 'cat-carbonated.png',
+  'Popcorn': 'cat-popcorn.png'
+};
 const MAX_PHOTO_CHARS = 300000;
 const TOTAL_SECONDS = 600;
 const RING_LEN = 565.5;
@@ -227,14 +234,13 @@ onSnapshot(collection(db, 'products'), (snap) => {
 function stockClass(s) { return s === 0 ? 'out' : (s <= 5 ? 'low' : ''); }
 function stockText(s) { return s === 0 ? 'Sold Out' : (s === 1 ? '1 left' : s + ' left'); }
 
-// Category row: each card jumps to its section, shows the lowest price
+// Category row: each card uses its own picture, jumps to its section, shows the lowest price
 function renderCategories() {
   document.getElementById('cats').innerHTML = SECTIONS.map(sec => {
     const items = products.filter(p => p.section === sec);
-    const first = items.find(p => p.photo) || {};
     const minPrice = items.length ? Math.min(...items.map(p => Number(p.price) || 0)) : null;
     return `<a class="catcard" href="#sec-${slug(sec)}">
-      <img src="${first.photo || 'shafaz-logo.png'}" alt="">
+      <img src="${CAT_IMAGES[sec]}" alt="${esc(sec)}" onerror="this.src='shafaz-logo.png'">
       <div class="n">${esc(sec)}</div>
       <div class="f">${minPrice !== null ? 'From ₹' + minPrice : 'Coming soon'}</div>
     </a>`;
