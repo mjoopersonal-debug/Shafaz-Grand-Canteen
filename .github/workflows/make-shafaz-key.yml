@@ -14,11 +14,11 @@ jobs:
 
       - name: Create keystore
 
-        run: |
+        run: keytool -genkeypair -keystore shafaz.jks -storetype JKS -keyalg RSA -keysize 2048 -validity 10000 -alias shafaz -storepass "ShafazKey2026!" -keypass "ShafazKey2026!" -dname "CN=Shafaz Canteen, OU=App, O=Shafaz Grand, L=Kerala, S=Kerala, C=IN"
 
-          keytool -genkeypair -v -keystore shafaz.jks -storetype JKS -keyalg RSA -keysize 2048 -validity 10000 -alias shafaz -storepass "ShafazKey2026!" -keypass "ShafazKey2026!" -dname "CN=Shafaz Canteen, OU=App, O=Shafaz Grand, L=Kerala, S=Kerala, C=IN"
+      - name: Encode keystore
 
-          base64 -w 0 shafaz.jks > shafaz.b64
+        run: base64 -w 0 shafaz.jks > shafaz.b64
 
       - uses: actions/upload-artifact@v4
 
