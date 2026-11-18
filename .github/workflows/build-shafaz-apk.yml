@@ -31,7 +31,7 @@ jobs:
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > android/app/softies.jks
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/shafaz.jks
 
       - name: Patch Android for alarms, Firebase, name and signing
         env:
@@ -57,8 +57,8 @@ jobs:
           t = re.sub(r'applicationId\s*=\s*"[^"]*"', 'applicationId = "com.shafazgrand.canteen"', t)
           signing = (
               'signingConfigs {\n'
-              '        create("softies") {\n'
-              '            storeFile = file("softies.jks")\n'
+              '        create("shafaz") {\n'
+              '            storeFile = file("shafaz.jks")\n'
               '            storePassword = "' + pw + '"\n'
               '            keyAlias = "' + alias + '"\n'
               '            keyPassword = "' + pw + '"\n'
@@ -67,7 +67,7 @@ jobs:
               '    buildTypes {'
           )
           t = t.replace('buildTypes {', signing, 1)
-          t = re.sub(r'signingConfig\s*=\s*signingConfigs\.getByName\("debug"\)', 'signingConfig = signingConfigs.getByName("softies")', t)
+          t = re.sub(r'signingConfig\s*=\s*signingConfigs\.getByName\("debug"\)', 'signingConfig = signingConfigs.getByName("shafaz")', t)
           if 'google-services' not in t:
               t = t.replace('id("dev.flutter.flutter-gradle-plugin")', 'id("dev.flutter.flutter-gradle-plugin")\n    id("com.google.gms.google-services")', 1)
           open(g, 'w').write(t)
@@ -79,15 +79,16 @@ jobs:
           print('patched')
           PYEOF
 
-      - name: Make logo and app icon from shafaz-logo.png
+      - name: Make round app icon from app-logo.png
         run: |
           mkdir -p assets
           cp shafaz-logo.png assets/logo.png
-          convert shafaz-logo.png -crop 38%x100%+0+0 +repage -trim +repage -background "#0E0606" -gravity center -resize 512x512 -extent 512x512 icon512.png
+          convert app-logo.png -trim +repage -resize 440x440 -background "#3D0519" -gravity center -extent 512x512 icon512.png
+          convert icon512.png \( +clone -alpha extract -draw "fill black polygon 0,0 0,512 512,512 512,0" -fill white -draw "circle 256,256 256,0" \) -compose CopyOpacity -composite round512.png
           rm -rf android/app/src/main/res/mipmap-anydpi-v26
           for pair in mdpi:48 hdpi:72 xhdpi:96 xxhdpi:144 xxxhdpi:192; do
             d=${pair%%:*}; s=${pair##*:}
-            convert icon512.png -resize ${s}x${s} android/app/src/main/res/mipmap-$d/ic_launcher.png
+            convert round512.png -resize ${s}x${s} android/app/src/main/res/mipmap-$d/ic_launcher.png
             cp android/app/src/main/res/mipmap-$d/ic_launcher.png android/app/src/main/res/mipmap-$d/ic_launcher_round.png
           done
 
