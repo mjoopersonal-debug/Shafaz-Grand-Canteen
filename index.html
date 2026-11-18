@@ -40,7 +40,7 @@
   .badge { position:absolute; top:-4px; right:-6px; background:var(--red); color:#fff; border-radius:50%; font-size:11px; min-width:18px; height:18px; line-height:18px; text-align:center; font-weight:bold; display:none; }
   .pill { background:var(--gold); color:#2a1606; border:0; border-radius:20px; padding:8px 12px; font-weight:bold; font-size:13px; }
 
-  /* Hero: theatre background, darker on the left so text stays readable */
+  /* Hero */
   .hero { position:relative; margin:12px; border-radius:20px; overflow:hidden; min-height:300px; background:#1a0b0b url('theatre.png') center center/cover no-repeat; border:1px solid rgba(245,185,66,.3); }
   .hero::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(14,6,6,.8) 0%, rgba(14,6,6,.35) 50%, rgba(14,6,6,0) 100%); }
   .hero img.pic { position:absolute; right:0; bottom:0; height:92%; max-width:45%; object-fit:contain; z-index:1; }
@@ -99,9 +99,11 @@
   input[type=text] { width:100%; padding:12px; font-size:16px; border:1px solid var(--gold); border-radius:12px; background:#24100c; color:var(--text); margin-top:6px; }
   .hint { color:var(--muted); font-size:12px; margin-top:4px; }
   .payrow { display:flex; gap:14px; align-items:center; margin-top:14px; background:#24100c; border-radius:16px; padding:12px; }
-  .payrow img { width:120px; background:#fff; border-radius:10px; padding:4px; }
-  .payrow .u { font-size:13px; color:var(--muted); }
-  .payrow .u b { display:block; color:var(--text); font-size:15px; word-break:break-all; }
+  .payrow a.qrlink { display:block; flex-shrink:0; }
+  .payrow img { width:120px; background:#fff; border-radius:10px; padding:4px; display:block; }
+  .payrow .u { font-size:13px; color:var(--muted); flex:1; }
+  .upibtn { display:block; width:100%; margin-top:6px; padding:12px; border-radius:12px; background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#2a1606; font-weight:bold; font-size:15px; text-align:center; text-decoration:none; word-break:break-all; }
+  .upihint { font-size:12px; color:var(--muted); margin-top:4px; text-align:center; }
   .file { margin-top:6px; color:var(--text); font-size:14px; }
   #payPreview { display:none; width:100%; max-height:180px; object-fit:contain; margin-top:8px; border-radius:12px; background:#fff; }
   .primary { width:100%; margin-top:16px; padding:14px; border:0; border-radius:14px; background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#2a1606; font-size:17px; font-weight:bold; }
@@ -163,9 +165,11 @@
     <div class="hint">Type your exact theatre seat number</div>
 
     <div class="payrow">
-      <img src="qr.png" alt="Payment QR code">
-      <div class="u">Pay by UPI<b>9744123717@superyes</b></div>
+      <a class="qrlink" id="qrLink" href="#"><img src="qr.png" alt="Payment QR code"></a>
+      <div class="u">Scan the QR code, or pay by UPI ID below.</div>
     </div>
+    <a class="upibtn" id="upiLink" href="#">Pay with UPI: 9744123717@superyes</a>
+    <div class="upihint">On a phone, tapping opens your UPI app (GPay, PhonePe, Paytm).</div>
 
     <label for="payShot">Upload payment screenshot</label>
     <input id="payShot" class="file" type="file" accept="image/*">
@@ -206,6 +210,8 @@ const SECTIONS = ['Cold Drinks', 'Snacks', 'Puffs & Veg', 'Lays (Chips)', 'Carbo
 const MAX_PHOTO_CHARS = 300000;
 const TOTAL_SECONDS = 600;
 const RING_LEN = 565.5;
+const UPI_ID = '9744123717@superyes';
+const PAYEE = 'Shafaz Grand Canteen';
 
 let products = [];
 const cart = {}; // productId -> qty
@@ -293,10 +299,14 @@ function cartLines() {
   }).filter(Boolean);
 }
 
+function cartTotal() {
+  return cartLines().reduce((s, l) => s + l.qty * l.price, 0);
+}
+
 function renderBar() {
   const lines = cartLines();
   const count = lines.reduce((s, l) => s + l.qty, 0);
-  const total = lines.reduce((s, l) => s + l.qty * l.price, 0);
+  const total = cartTotal();
   document.getElementById('bar').style.display = count > 0 ? 'flex' : 'none';
   document.getElementById('barText').textContent = `${count} item${count === 1 ? '' : 's'} · ₹${total}`;
   const badge = document.getElementById('cartBadge');
@@ -306,11 +316,23 @@ function renderBar() {
 
 function renderCart() {
   const lines = cartLines();
-  const total = lines.reduce((s, l) => s + l.qty * l.price, 0);
+  const total = cartTotal();
   document.getElementById('cartLines').innerHTML = lines.map(l =>
     `<div class="line"><span>${esc(l.name)} × ${l.qty}</span><span>₹${l.qty * l.price}</span></div>`).join('')
     || '<p class="empty">Your cart is empty.</p>';
   document.getElementById('cartTotal').textContent = 'Total: ₹' + total;
+  updatePayLinks();
+}
+
+// Builds the UPI payment link with the cart total and the seat as the note
+function updatePayLinks() {
+  const total = cartTotal();
+  const seat = document.getElementById('seat').value.trim();
+  const note = seat ? 'Seat ' + seat : 'Shafaz Canteen order';
+  const link = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE)}` +
+               `&am=${total}&cu=INR&tn=${encodeURIComponent(note)}`;
+  document.getElementById('upiLink').href = link;
+  document.getElementById('qrLink').href = link;
 }
 
 function openCart() {
@@ -322,6 +344,17 @@ document.getElementById('topCart').addEventListener('click', openCart);
 document.getElementById('cartIcon').addEventListener('click', openCart);
 document.getElementById('closeCart').addEventListener('click', () => {
   document.getElementById('cartPanel').style.display = 'none';
+});
+document.getElementById('seat').addEventListener('input', updatePayLinks);
+
+// Stop the link opening if the cart is empty
+['upiLink', 'qrLink'].forEach(id => {
+  document.getElementById(id).addEventListener('click', (e) => {
+    if (cartTotal() === 0) {
+      e.preventDefault();
+      document.getElementById('msg').textContent = 'Add items to your cart first.';
+    }
+  });
 });
 
 document.getElementById('payShot').addEventListener('change', (e) => {
@@ -387,7 +420,7 @@ document.getElementById('send').addEventListener('click', async () => {
   btn.disabled = true; btn.textContent = 'Sending...';
   try {
     const paymentPhoto = await compressImage(shot);
-    const total = lines.reduce((s, l) => s + l.qty * l.price, 0);
+    const total = cartTotal();
     const items = lines.map(l => ({ id: l.id, name: l.name, price: l.price, qty: l.qty }));
 
     // Reduce stock for every item in one safe step. If any item is short, nothing is saved.
