@@ -93,6 +93,7 @@ class _OrderCard extends StatelessWidget {
   Widget _itemRow(Map<String, dynamic> it) {
     final photo = photos[it['id']];
     final cold = it['cold'];
+    final free = (it['freeQty'] as num?)?.toInt() ?? 0;
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -124,6 +125,9 @@ class _OrderCard extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+                if (free > 0)
+                  Text('$free FREE (Shafaz Points)',
+                      style: const TextStyle(color: Colors.greenAccent, fontSize: 13, fontWeight: FontWeight.bold)),
               ],
             ),
           ),
@@ -141,6 +145,10 @@ class _OrderCard extends StatelessWidget {
     final who = (d['name'] ?? '').toString();
     final how = (d['delivery'] ?? '').toString();
     final movie = (d['movie'] ?? '').toString();
+    final email = (d['email'] ?? '').toString();
+    final tip = (d['tip'] as num?) ?? 0;
+    final used = (d['pointsUsed'] as num?)?.toInt() ?? 0;
+    final earned = (d['pointsEarned'] as num?)?.toInt() ?? 0;
     final total = d['total'] ?? 0;
     final items = (d['items'] as List?) ?? [];
     final pay = bytesFrom(d['paymentPhoto']);
@@ -171,10 +179,23 @@ class _OrderCard extends StatelessWidget {
             if (who.isNotEmpty) Text('Name: $who', style: const TextStyle(color: textCol, fontSize: 15)),
             if (how.isNotEmpty) Text('Delivery: $how', style: const TextStyle(color: textCol, fontSize: 15)),
             if (movie.isNotEmpty) Text('Movie: $movie', style: const TextStyle(color: mutedCol, fontSize: 13)),
+            if (email.isNotEmpty) Text('Google: $email', style: const TextStyle(color: mutedCol, fontSize: 13)),
+            if (used > 0)
+              Container(
+                margin: const EdgeInsets.only(top: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(10)),
+                child: Text('FREE POPCORN · $used points used',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+              ),
             const SizedBox(height: 12),
             for (final raw in items) _itemRow(raw as Map<String, dynamic>),
             const Divider(color: Colors.white24),
+            if (tip > 0)
+              Text('Delivery boy tip: ₹$tip', style: const TextStyle(color: textCol, fontSize: 14)),
             Text('Total: ₹$total', style: const TextStyle(color: gold, fontSize: 18, fontWeight: FontWeight.bold)),
+            if (earned > 0)
+              Text('Customer earned $earned Shafaz Points', style: const TextStyle(color: mutedCol, fontSize: 12)),
             if (pay != null) ...[
               const SizedBox(height: 10),
               const Text('Payment screenshot (tap to view)', style: TextStyle(color: mutedCol, fontSize: 12)),
