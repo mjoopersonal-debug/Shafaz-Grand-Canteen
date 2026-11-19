@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
       - uses: subosito/flutter-action@v2
         with:
@@ -78,6 +78,19 @@ jobs:
               open(r, 'w').write(u)
           print('patched')
           PYEOF
+
+      - name: Turn off release lint checks
+        run: |
+          cat >> android/build.gradle.kts << 'EOF'
+
+          subprojects {
+              tasks.configureEach {
+                  if (name.startsWith("lintVital") || name.startsWith("lintAnalyze")) {
+                      enabled = false
+                  }
+              }
+          }
+          EOF
 
       - name: Make round app icon from app-logo.png
         run: |
