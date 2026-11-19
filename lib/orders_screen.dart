@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'main.dart' show gold, mutedCol, textCol;
 
-// Turns saved photo text back into image bytes. Returns null if there is no photo.
 Uint8List? bytesFrom(dynamic value) {
   if (value is! String || value.isEmpty) return null;
   final comma = value.indexOf(',');
@@ -16,7 +15,6 @@ Uint8List? bytesFrom(dynamic value) {
   }
 }
 
-// Opens a photo full screen with zoom
 void showFullImage(BuildContext context, String title, Uint8List bytes) {
   showDialog(
     context: context,
@@ -51,7 +49,6 @@ class OrdersScreen extends StatelessWidget {
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('products').snapshots(),
         builder: (context, prodSnap) {
-          // Product id -> photo, so each order item shows its picture
           final photos = <String, Uint8List?>{};
           for (final p in prodSnap.data?.docs ?? const <QueryDocumentSnapshot>[]) {
             photos[p.id] = bytesFrom((p.data() as Map<String, dynamic>)['photo']);
@@ -106,7 +103,7 @@ class _OrderCard extends StatelessWidget {
               height: 56,
               color: Colors.white,
               child: photo != null
-                  ? Image.memory(photo, fit: BoxFit.contain)
+                  ? Image.memory(photo, fit: BoxFit.cover)
                   : const Icon(Icons.fastfood, color: Colors.grey),
             ),
           ),
@@ -125,6 +122,10 @@ class _OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final d = doc.data() as Map<String, dynamic>;
     final seat = (d['seat'] ?? '').toString();
+    final pickup = (d['pickupNo'] ?? '').toString();
+    final who = (d['name'] ?? '').toString();
+    final how = (d['delivery'] ?? '').toString();
+    final movie = (d['movie'] ?? '').toString();
     final total = d['total'] ?? 0;
     final items = (d['items'] as List?) ?? [];
     final pay = bytesFrom(d['paymentPhoto']);
@@ -150,6 +151,11 @@ class _OrderCard extends StatelessWidget {
                 Text(timeText, style: const TextStyle(color: mutedCol)),
               ],
             ),
+            const SizedBox(height: 8),
+            Text(pickup, style: const TextStyle(color: gold, fontSize: 22, fontWeight: FontWeight.bold)),
+            if (who.isNotEmpty) Text('Name: $who', style: const TextStyle(color: textCol, fontSize: 15)),
+            if (how.isNotEmpty) Text('Delivery: $how', style: const TextStyle(color: textCol, fontSize: 15)),
+            if (movie.isNotEmpty) Text('Movie: $movie', style: const TextStyle(color: mutedCol, fontSize: 13)),
             const SizedBox(height: 12),
             for (final raw in items) _itemRow(raw as Map<String, dynamic>),
             const Divider(color: Colors.white24),
