@@ -44,11 +44,12 @@ jobs:
           alias = os.environ['KEY_ALIAS']
           p = 'android/app/src/main/AndroidManifest.xml'
           s = open(p).read()
-          perms = ['SCHEDULE_EXACT_ALARM','USE_EXACT_ALARM','POST_NOTIFICATIONS','WAKE_LOCK','VIBRATE','USE_FULL_SCREEN_INTENT','RECEIVE_BOOT_COMPLETED','FOREGROUND_SERVICE','FOREGROUND_SERVICE_MEDIA_PLAYBACK','REQUEST_IGNORE_BATTERY_OPTIMIZATIONS','INTERNET']
+          perms = ['SCHEDULE_EXACT_ALARM','USE_EXACT_ALARM','POST_NOTIFICATIONS','WAKE_LOCK','VIBRATE','USE_FULL_SCREEN_INTENT','RECEIVE_BOOT_COMPLETED','FOREGROUND_SERVICE','FOREGROUND_SERVICE_MEDIA_PLAYBACK','FOREGROUND_SERVICE_DATA_SYNC','REQUEST_IGNORE_BATTERY_OPTIMIZATIONS','INTERNET']
           add = ''.join('    <uses-permission android:name="android.permission.%s"/>\n' % x for x in perms)
           s = s.replace('<application', add + '    <application', 1)
           s = s.replace('<activity', '<activity android:showWhenLocked="true" android:turnScreenOn="true"', 1)
           s = re.sub(r'android:label="[^"]*"', 'android:label="Shafaz Canteen"', s, count=1)
+          s = s.replace('</application>', '    <service android:name="com.pravera.flutter_foreground_task.service.ForegroundService" android:foregroundServiceType="dataSync" android:exported="false"/>\n    </application>', 1)
           open(p, 'w').write(s)
           g = 'android/app/build.gradle.kts'
           t = open(g).read()
