@@ -9,6 +9,7 @@ import 'foreground_service.dart';
 import 'movies_screen.dart';
 import 'orders_screen.dart';
 import 'products_screen.dart';
+import 'sales_screen.dart';
 
 const gold = Color(0xFFF5B942);
 const gold2 = Color(0xFFFFD76A);
@@ -306,8 +307,10 @@ class _HomeState extends State<HomeScreen> {
           const SizedBox(height: 16),
           _menuTile('New orders', 'Pickup number, seat, items, photos and payment screenshot',
               Icons.receipt_long, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OrdersScreen()))),
-          _menuTile('Manage products', 'Add items, photos, prices and stock',
+          _menuTile('Manage products', 'Add, edit, photos, prices and stock',
               Icons.inventory_2, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProductsScreen()))),
+          _menuTile('Daily sales', 'Orders, sales total and best sellers',
+              Icons.bar_chart, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SalesScreen()))),
           _menuTile('Movies & interval', 'Movie names, start times and interval minutes',
               Icons.movie, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MoviesScreen()))),
           const SizedBox(height: 24),
