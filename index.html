@@ -55,7 +55,8 @@
   .title::before { left:8%; } .title::after { right:8%; transform:scaleX(-1); }
 
   .tools { display:flex; gap:10px; align-items:center; padding:0 12px 10px; flex-wrap:wrap; }
-  .tools input[type=search] { flex:1; min-width:180px; padding:11px 14px; border-radius:14px; border:1px solid var(--gold); background:#24100c; color:var(--text); font-size:15px; }
+  .tools input[type=search] { flex:1 1 100%; padding:11px 14px; border-radius:14px; border:1px solid var(--gold); background:#24100c; color:var(--text); font-size:15px; }
+  .tools select { padding:9px 12px; border-radius:12px; border:1px solid var(--gold); background:#24100c; color:var(--text); font-size:14px; }
   .chk { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--gold2); margin:0; font-weight:bold; }
 
   .cats { display:flex; gap:10px; overflow-x:auto; padding:4px 12px 12px; scrollbar-width:none; }
@@ -76,8 +77,9 @@
   .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding-bottom:12px; }
   .card { background:linear-gradient(180deg,#24100c,var(--panel)); border:1px solid rgba(245,185,66,.25); border-radius:16px; padding:10px; display:flex; flex-direction:column; }
   .card.soldout { opacity:.5; }
-  .card .pic { aspect-ratio:1/1; background:#fff; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+  .card .pic { position:relative; aspect-ratio:1/1; background:#fff; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
   .card .pic img { width:100%; height:100%; object-fit:cover; }
+  .popular { position:absolute; top:6px; left:6px; background:var(--red); color:#fff; font-size:11px; font-weight:bold; border-radius:10px; padding:3px 8px; }
   .card .name { font-size:14px; font-weight:bold; margin-top:8px; color:var(--text); }
   .row { display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
   .price { color:var(--red); font-weight:900; font-size:16px; }
@@ -155,12 +157,20 @@
   <img class="pic" src="hero.png" alt="" onerror="this.style.display='none'">
 </section>
 
+<div class="movbar" id="seatBar"></div>
 <div class="movbar" id="movBar"></div>
 
 <div class="title" id="menu-top">Our Categories</div>
 
 <div class="tools">
   <input id="q" type="search" placeholder="Search Frooti, Popcorn, Lays...">
+  <select id="priceF">
+    <option value="">Any price</option>
+    <option value="0-29">Under ₹30</option>
+    <option value="30-60">₹30 – ₹60</option>
+    <option value="61-100">₹61 – ₹100</option>
+    <option value="101-99999">Above ₹100</option>
+  </select>
   <label class="chk"><input type="checkbox" id="inStock"> In stock only</label>
 </div>
 
@@ -264,16 +274,32 @@ const UPI_ID = '9744123717@superyes';
 const PAYEE = 'Shafaz Grand Canteen';
 
 let products = [];
+let popular = new Set();
 let movies = [];
 let selMovie = null;
 let delivery = '';
 let openCat = null;
 const cart = {};
-const coldPref = {}; // productId -> false when the customer unticks Cold
+const coldPref = {};
 
 const $ = id => document.getElementById(id);
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
 function fmt12(d) { return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); }
+
+// ---------- Seat QR: ?screen=2&row=B&seat=12 ----------
+(function seatFromQr() {
+  const p = new URLSearchParams(location.search);
+  const clean = (v, n) => (p.get(v) || '').replace(/[^A-Za-z0-9 -]/g, '').trim().slice(0, n);
+  const screen = clean('screen', 3), row = clean('row', 3), seat = clean('seat', 4);
+  if (!row && !seat) return;
+  const text = (screen ? 'Screen ' + screen + ' ' : '') + row + seat;
+  $('seat').value = text.slice(0, 20);
+  const bar = $('seatBar');
+  bar.style.display = 'block';
+  bar.innerHTML = '📍 ' + (screen ? 'Screen <b>' + esc(screen) + '</b> · ' : '') +
+    (row ? 'Row <b>' + esc(row) + '</b> · ' : '') + (seat ? 'Seat <b>' + esc(seat) + '</b>' : '') +
+    ' <span style="color:var(--muted)">(from your seat QR)</span>';
+})();
 
 // ---------- Movies and interval ----------
 function timesFor(m) {
@@ -340,6 +366,9 @@ setInterval(renderMovieBar, 30000);
 // ---------- Products ----------
 onSnapshot(collection(db, 'products'), (snap) => {
   products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  // Popular = the 3 most ordered items
+  popular = new Set(products.filter(p => Number(p.sold) > 0)
+    .sort((a, b) => Number(b.sold) - Number(a.sold)).slice(0, 3).map(p => p.id));
   renderCategories();
   renderPanel(false);
   renderBar();
@@ -364,7 +393,8 @@ function cardHtml(p) {
   const q = cart[p.id] || 0;
   const out = p.stock <= 0;
   return `<div class="card${out ? ' soldout' : ''}">
-    <div class="pic">${p.photo ? `<img src="${p.photo}" alt="">` : '<span style="color:#999;font-size:12px;">No photo</span>'}</div>
+    <div class="pic">${p.photo ? `<img src="${p.photo}" alt="">` : '<span style="color:#999;font-size:12px;">No photo</span>'}
+      ${popular.has(p.id) ? '<span class="popular">🔥 Popular</span>' : ''}</div>
     <div class="name">${esc(p.name)}</div>
     <div class="row"><span class="price">₹${p.price}</span><span class="left ${stockClass(p.stock)}">${stockText(p.stock)}</span></div>
     ${out ? '<button class="add" disabled>Sold Out</button>'
@@ -373,17 +403,27 @@ function cardHtml(p) {
   </div>`;
 }
 
+function applyFilters(list) {
+  if ($('inStock').checked) list = list.filter(p => p.stock > 0);
+  const pf = $('priceF').value;
+  if (pf) {
+    const [lo, hi] = pf.split('-').map(Number);
+    list = list.filter(p => Number(p.price) >= lo && Number(p.price) <= hi);
+  }
+  return list;
+}
+
 function renderPanel(scroll) {
   const q = $('q').value.trim().toLowerCase();
-  const only = $('inStock').checked;
+  const filtersOn = $('inStock').checked || $('priceF').value;
   const panel = $('catPanel');
   const inner = panel.firstElementChild;
   let list = null, title = '';
   if (q) { list = products.filter(p => String(p.name).toLowerCase().includes(q)); title = 'Results for “' + q + '”'; }
   else if (openCat) { list = products.filter(p => p.section === openCat); title = openCat; }
-  else if (only) { list = products; title = 'All items in stock'; }
+  else if (filtersOn) { list = products; title = 'Filtered items'; }
   if (list === null) { panel.classList.remove('open'); return; }
-  if (only) list = list.filter(p => p.stock > 0);
+  list = applyFilters(list);
   inner.innerHTML = `<div class="panelhead"><h2>${esc(title)}</h2>${openCat && !q ? '<button data-close="1">Close ✕</button>' : ''}</div>
     <div class="grid">${list.map(cardHtml).join('') || '<p class="empty" style="grid-column:1/-1;">No items found</p>'}</div>`;
   panel.classList.add('open');
@@ -400,6 +440,7 @@ $('cats').addEventListener('click', (e) => {
 });
 $('q').addEventListener('input', () => renderPanel(false));
 $('inStock').addEventListener('change', () => renderPanel(false));
+$('priceF').addEventListener('change', () => renderPanel(false));
 
 $('catPanel').addEventListener('click', (e) => {
   if (e.target.closest('[data-close]')) { openCat = null; renderCategories(); renderPanel(false); return; }
@@ -576,7 +617,10 @@ $('send').addEventListener('click', async () => {
       });
       const n = cs.exists() ? cs.data().n + 1 : 1001;
       pickupNo = 'SGC-' + n;
-      snaps.forEach((s, i) => tx.update(refs[i], { stock: s.data().stock - lines[i].qty }));
+      snaps.forEach((s, i) => tx.update(refs[i], {
+        stock: s.data().stock - lines[i].qty,
+        sold: (Number(s.data().sold) || 0) + lines[i].qty
+      }));
       if (cs.exists()) tx.update(counterRef, { n }); else tx.set(counterRef, { n });
       tx.set(orderRef, { seat, name, items, total, paymentPhoto, status: 'Pending', time: serverTimestamp(),
                          pickupNo, delivery: dlv, movie });
