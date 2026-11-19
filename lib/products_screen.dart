@@ -31,7 +31,7 @@ class ProductsScreen extends StatelessWidget {
         label: const Text('Add product'),
         onPressed: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => const AddProductScreen()),
+          MaterialPageRoute(builder: (_) => const ProductFormScreen()),
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
@@ -57,51 +57,6 @@ class ProductsScreen extends StatelessWidget {
 class _ProductTile extends StatelessWidget {
   final QueryDocumentSnapshot doc;
   const _ProductTile({required this.doc});
-
-  Future<void> _edit(BuildContext context, Map<String, dynamic> d) async {
-    final priceC = TextEditingController(text: '${d['price'] ?? ''}');
-    final stockC = TextEditingController(text: '${d['stock'] ?? ''}');
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Edit product'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: priceC,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Price (₹)'),
-            ),
-            const SizedBox(height: 10),
-            TextField(
-              controller: stockC,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'Stock (items left)'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
-        ],
-      ),
-    );
-    final price = int.tryParse(priceC.text.trim());
-    final stock = int.tryParse(stockC.text.trim());
-    priceC.dispose();
-    stockC.dispose();
-    if (ok != true) return;
-    if (price == null || stock == null || stock < 0) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Enter a valid price and stock.')),
-        );
-      }
-      return;
-    }
-    await doc.reference.update({'price': price, 'stock': stock});
-  }
 
   Future<void> _delete(BuildContext context, String name) async {
     final ok = await showDialog<bool>(
@@ -129,6 +84,7 @@ class _ProductTile extends StatelessWidget {
     final price = d['price'] ?? 0;
     final section = (d['section'] ?? '').toString();
     final stock = d['stock'] is num ? (d['stock'] as num).toInt() : 0;
+    final sold = d['sold'] is num ? (d['sold'] as num).toInt() : 0;
     final photo = bytesFrom(d['photo']);
     final soldOut = stock <= 0;
 
@@ -160,6 +116,7 @@ class _ProductTile extends StatelessWidget {
                     '₹$price  ·  ${soldOut ? 'Sold Out' : '$stock left'}',
                     style: TextStyle(color: soldOut ? redAccent : gold, fontWeight: FontWeight.w600),
                   ),
+                  if (sold > 0) Text('$sold sold', style: const TextStyle(color: mutedCol, fontSize: 12)),
                 ],
               ),
             ),
@@ -167,7 +124,10 @@ class _ProductTile extends StatelessWidget {
               children: [
                 IconButton(
                   icon: const Icon(Icons.edit, color: gold),
-                  onPressed: () => _edit(context, d),
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => ProductFormScreen(doc: doc)),
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline, color: redAccent),
@@ -182,13 +142,15 @@ class _ProductTile extends StatelessWidget {
   }
 }
 
-class AddProductScreen extends StatefulWidget {
-  const AddProductScreen({super.key});
+// Used for both adding a new product and editing an existing one
+class ProductFormScreen extends StatefulWidget {
+  final QueryDocumentSnapshot? doc;
+  const ProductFormScreen({super.key, this.doc});
   @override
-  State<AddProductScreen> createState() => _AddProductState();
+  State<ProductFormScreen> createState() => _ProductFormState();
 }
 
-class _AddProductState extends State<AddProductScreen> {
+class _ProductFormState extends State<ProductFormScreen> {
   final _name = TextEditingController();
   final _price = TextEditingController();
   final _stock = TextEditingController();
@@ -197,6 +159,26 @@ class _AddProductState extends State<AddProductScreen> {
   Uint8List? _preview;
   bool _busy = false;
   String? _error;
+
+  bool get _editing => widget.doc != null;
+
+  @override
+  void initState() {
+    super.initState();
+    final d = widget.doc?.data() as Map<String, dynamic>?;
+    if (d != null) {
+      _name.text = (d['name'] ?? '').toString();
+      _price.text = '${d['price'] ?? ''}';
+      _stock.text = '${d['stock'] ?? ''}';
+      final s = (d['section'] ?? '').toString();
+      if (sections.contains(s)) _section = s;
+      final p = d['photo'];
+      if (p is String && p.isNotEmpty) {
+        _photo = p;
+        _preview = bytesFrom(p);
+      }
+    }
+  }
 
   @override
   void dispose() {
@@ -264,13 +246,18 @@ class _AddProductState extends State<AddProductScreen> {
       _error = null;
     });
     try {
-      await FirebaseFirestore.instance.collection('products').add({
+      final data = {
         'name': name,
         'price': price,
         'section': _section,
         'stock': stock,
         'photo': _photo,
-      });
+      };
+      if (_editing) {
+        await widget.doc!.reference.update(data);
+      } else {
+        await FirebaseFirestore.instance.collection('products').add(data);
+      }
       if (mounted) Navigator.pop(context);
     } catch (e) {
       _fail('Could not save: $e');
@@ -281,7 +268,7 @@ class _AddProductState extends State<AddProductScreen> {
   Widget build(BuildContext context) {
     final boxSize = MediaQuery.of(context).size.width - 32;
     return Scaffold(
-      appBar: AppBar(title: const Text('Add product')),
+      appBar: AppBar(title: Text(_editing ? 'Edit product' : 'Add product')),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -303,6 +290,11 @@ class _AddProductState extends State<AddProductScreen> {
                     ),
             ),
           ),
+          if (_editing)
+            const Padding(
+              padding: EdgeInsets.only(top: 6),
+              child: Text('Tap the photo to change it', style: TextStyle(color: mutedCol, fontSize: 12)),
+            ),
           const SizedBox(height: 16),
           TextField(
             controller: _name,
@@ -337,7 +329,7 @@ class _AddProductState extends State<AddProductScreen> {
             height: 52,
             child: FilledButton(
               onPressed: _busy ? null : _save,
-              child: Text(_busy ? 'Saving...' : 'Save product',
+              child: Text(_busy ? 'Saving...' : (_editing ? 'Save changes' : 'Save product'),
                   style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
             ),
           ),
