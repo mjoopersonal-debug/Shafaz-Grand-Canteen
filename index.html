@@ -7,20 +7,17 @@
 <title>Shafaz Grand Canteen</title>
 <link id="favicon" rel="icon" type="image/png" href="shafaz-logo.png">
 <script>
-// Makes a round favicon from the logo's left part (reel, clapper, popcorn)
 (function () {
   var img = new Image();
   img.onload = function () {
-    var s = 128;
-    var c = document.createElement('canvas');
+    var s = 128, c = document.createElement('canvas');
     c.width = s; c.height = s;
     var g = c.getContext('2d');
     g.beginPath(); g.arc(s / 2, s / 2, s / 2, 0, Math.PI * 2);
     g.fillStyle = '#0E0606'; g.fill();
     g.save();
     g.beginPath(); g.arc(s / 2, s / 2, s / 2, 0, Math.PI * 2); g.clip();
-    var side = img.height;
-    g.drawImage(img, 0, 0, side, side, s * 0.08, s * 0.08, s * 0.84, s * 0.84);
+    g.drawImage(img, 0, 0, img.height, img.height, s * 0.08, s * 0.08, s * 0.84, s * 0.84);
     g.restore();
     document.getElementById('favicon').href = c.toDataURL('image/png');
   };
@@ -32,7 +29,6 @@
   * { box-sizing:border-box; }
   body { margin:0; font-family:'Segoe UI',Arial,sans-serif; background:radial-gradient(circle at top, #3a1208 0%, var(--bg) 60%); color:var(--text); padding-bottom:90px; min-height:100vh; }
 
-  /* Header */
   .top { display:flex; align-items:center; justify-content:space-between; padding:12px 14px; background:rgba(14,6,6,.92); border-bottom:1px solid rgba(245,185,66,.25); position:sticky; top:0; z-index:8; }
   .top img { height:56px; width:auto; }
   .top .right { display:flex; align-items:center; gap:10px; }
@@ -40,7 +36,6 @@
   .badge { position:absolute; top:-4px; right:-6px; background:var(--red); color:#fff; border-radius:50%; font-size:11px; min-width:18px; height:18px; line-height:18px; text-align:center; font-weight:bold; display:none; }
   .pill { background:var(--gold); color:#2a1606; border:0; border-radius:20px; padding:8px 12px; font-weight:bold; font-size:13px; }
 
-  /* Hero */
   .hero { position:relative; margin:12px; border-radius:20px; overflow:hidden; min-height:300px; background:#1a0b0b url('theatre.png') center center/cover no-repeat; border:1px solid rgba(245,185,66,.3); }
   .hero::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(14,6,6,.8) 0%, rgba(14,6,6,.35) 50%, rgba(14,6,6,0) 100%); }
   .hero img.pic { position:absolute; right:0; bottom:0; height:92%; max-width:45%; object-fit:contain; z-index:1; }
@@ -50,27 +45,40 @@
   .hero p { color:#f1e2cc; font-size:14px; margin:10px 0 16px; }
   .cta { display:inline-block; background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#2a1606; font-weight:bold; border:0; border-radius:14px; padding:12px 20px; font-size:15px; text-decoration:none; }
 
-  /* Section titles */
+  .movbar { display:none; margin:0 12px 10px; background:#24100c; border:1px solid rgba(245,185,66,.4); border-radius:16px; padding:12px; font-size:14px; line-height:1.5; }
+  .movbar b { color:var(--gold); }
+  .movbar button { background:none; border:1px solid var(--gold); color:var(--gold); border-radius:10px; padding:4px 10px; margin-left:8px; font-size:12px; }
+  .movbar .warn { color:#ffb24d; font-weight:bold; display:block; margin-top:4px; }
+
   .title { text-align:center; margin:22px 0 12px; font-size:20px; font-weight:800; color:var(--gold); position:relative; }
   .title::before, .title::after { content:""; position:absolute; top:50%; width:22%; height:1px; background:linear-gradient(90deg,transparent,var(--gold)); }
   .title::before { left:8%; } .title::after { right:8%; transform:scaleX(-1); }
 
-  /* Category row */
+  .tools { display:flex; gap:10px; align-items:center; padding:0 12px 10px; flex-wrap:wrap; }
+  .tools input[type=search] { flex:1; min-width:180px; padding:11px 14px; border-radius:14px; border:1px solid var(--gold); background:#24100c; color:var(--text); font-size:15px; }
+  .chk { display:flex; align-items:center; gap:6px; font-size:13px; color:var(--gold2); margin:0; font-weight:bold; }
+
   .cats { display:flex; gap:10px; overflow-x:auto; padding:4px 12px 12px; scrollbar-width:none; }
   .cats::-webkit-scrollbar { display:none; }
-  .catcard { flex:0 0 auto; width:112px; background:var(--panel); border:1px solid rgba(245,185,66,.35); border-radius:16px; text-align:center; padding:8px 6px 10px; text-decoration:none; color:var(--text); }
-  .catcard img { width:100%; height:78px; object-fit:contain; background:#24100c; border-radius:12px; }
+  .catcard { flex:0 0 auto; width:112px; background:var(--panel); border:1px solid rgba(245,185,66,.35); border-radius:16px; text-align:center; padding:8px 6px 10px; color:var(--text); font-family:inherit; cursor:pointer; }
+  .catcard.active { border-color:var(--gold); box-shadow:0 0 0 2px rgba(245,185,66,.5); }
+  .catcard img { width:100%; aspect-ratio:1/1; object-fit:cover; background:#24100c; border-radius:12px; }
   .catcard .n { font-size:13px; font-weight:bold; margin-top:6px; min-height:32px; display:flex; align-items:center; justify-content:center; }
   .catcard .f { color:var(--gold); font-size:12px; }
 
-  /* Product sections */
-  section.sec { padding:4px 12px 6px; scroll-margin-top:70px; }
-  section.sec h2 { font-size:18px; color:var(--gold); margin:14px 4px 10px; font-weight:800; }
-  .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  /* Category panel opens in place */
+  .catpanel { display:grid; grid-template-rows:0fr; transition:grid-template-rows .35s ease; margin:0 12px; }
+  .catpanel.open { grid-template-rows:1fr; }
+  .catpanel .inner { overflow:hidden; min-height:0; }
+  .panelhead { display:flex; justify-content:space-between; align-items:center; margin:6px 4px 10px; }
+  .panelhead h2 { margin:0; font-size:18px; color:var(--gold); font-weight:800; }
+  .panelhead button { background:none; border:1px solid var(--gold); color:var(--gold); border-radius:12px; padding:6px 12px; font-size:13px; }
+
+  .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; padding-bottom:12px; }
   .card { background:linear-gradient(180deg,#24100c,var(--panel)); border:1px solid rgba(245,185,66,.25); border-radius:16px; padding:10px; display:flex; flex-direction:column; }
   .card.soldout { opacity:.5; }
-  .card .pic { background:#fff; border-radius:12px; height:110px; display:flex; align-items:center; justify-content:center; overflow:hidden; }
-  .card .pic img { max-width:100%; max-height:100%; object-fit:contain; }
+  .card .pic { aspect-ratio:1/1; background:#fff; border-radius:12px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+  .card .pic img { width:100%; height:100%; object-fit:cover; }
   .card .name { font-size:14px; font-weight:bold; margin-top:8px; color:var(--text); }
   .row { display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
   .price { color:var(--red); font-weight:900; font-size:16px; }
@@ -84,12 +92,10 @@
   .qty span { font-weight:bold; font-size:16px; }
   .empty { color:var(--muted); padding:10px 4px; }
 
-  /* Bottom cart bar */
   .bar { position:fixed; left:12px; right:12px; bottom:12px; background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#2a1606; padding:12px 16px; border-radius:18px; display:none; justify-content:space-between; align-items:center; z-index:10; box-shadow:0 8px 24px rgba(0,0,0,.5); }
   .bar b { font-size:15px; }
   .bar button { background:#2a1606; color:var(--gold); border:0; padding:10px 16px; border-radius:12px; font-weight:bold; font-size:14px; }
 
-  /* Cart sheet */
   .panel { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:20; overflow-y:auto; }
   .sheet { background:var(--panel); border:1px solid rgba(245,185,66,.35); margin:24px auto; max-width:480px; border-radius:22px; padding:18px; }
   .sheet h3 { color:var(--gold); margin:0 0 10px; font-size:20px; }
@@ -98,6 +104,10 @@
   label { display:block; font-weight:bold; margin-top:14px; font-size:14px; color:var(--gold2); }
   input[type=text] { width:100%; padding:12px; font-size:16px; border:1px solid var(--gold); border-radius:12px; background:#24100c; color:var(--text); margin-top:6px; }
   .hint { color:var(--muted); font-size:12px; margin-top:4px; }
+  .opt { display:flex; gap:10px; align-items:flex-start; background:#24100c; border:1px solid rgba(245,185,66,.3); border-radius:12px; padding:10px; margin-top:8px; font-weight:normal; color:var(--text); }
+  .opt input { margin-top:3px; }
+  .dnote { color:#ffb24d; font-size:13px; margin-top:8px; font-weight:bold; }
+  .movbtn { display:block; width:100%; text-align:left; margin-top:8px; padding:12px; border-radius:12px; border:1px solid var(--gold); background:#24100c; color:var(--text); font-size:15px; }
   .payrow { display:flex; gap:14px; align-items:center; margin-top:14px; background:#24100c; border-radius:16px; padding:12px; }
   .payrow a.qrlink { display:block; flex-shrink:0; }
   .payrow img { width:120px; background:#fff; border-radius:10px; padding:4px; display:block; }
@@ -111,15 +121,15 @@
   .close { width:100%; margin-top:8px; padding:10px; border:0; border-radius:12px; background:#2a1510; color:var(--text); font-size:15px; }
   #msg { color:#ff7068; font-weight:bold; text-align:center; margin-top:10px; }
 
-  /* Timer screen */
   .timerView { display:none; position:fixed; inset:0; background:radial-gradient(circle at top,#3a1208,var(--bg) 70%); z-index:30; overflow-y:auto; padding:28px 18px; text-align:center; }
   .timerView h2 { color:var(--gold); margin:0 0 6px; }
+  .pickup { font-size:36px; font-weight:900; color:var(--gold); letter-spacing:2px; margin:4px 0 2px; }
   .ring { position:relative; width:230px; height:230px; margin:18px auto; }
   .ring svg { transform:rotate(-90deg); }
   .ring .num { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
   .ring .num b { font-size:46px; color:var(--text); font-variant-numeric:tabular-nums; }
   .ring .num span { color:var(--muted); font-size:14px; }
-  .note { background:var(--panel); border:1px solid rgba(245,185,66,.35); border-radius:16px; padding:14px; font-size:15px; line-height:1.5; color:var(--text); }
+  .note { background:var(--panel); border:1px solid rgba(245,185,66,.35); border-radius:16px; padding:14px; font-size:15px; line-height:1.5; color:var(--text); margin-top:10px; }
   .call { display:none; margin-top:16px; background:#2a0f0a; border:1px solid var(--red); border-radius:16px; padding:14px; font-size:16px; line-height:1.5; }
   .call a { color:var(--gold); font-weight:bold; font-size:18px; }
 </style>
@@ -143,14 +153,31 @@
   <img class="pic" src="hero.png" alt="" onerror="this.style.display='none'">
 </section>
 
-<div class="title" id="menu-top">Our Categories</div>
-<nav class="cats" id="cats"></nav>
+<div class="movbar" id="movBar"></div>
 
-<main id="menu"><p class="empty" style="text-align:center;padding:30px;">Loading menu...</p></main>
+<div class="title" id="menu-top">Our Categories</div>
+
+<div class="tools">
+  <input id="q" type="search" placeholder="Search Frooti, Popcorn, Lays...">
+  <label class="chk"><input type="checkbox" id="inStock"> In stock only</label>
+</div>
+
+<nav class="cats" id="cats"></nav>
+<div class="catpanel" id="catPanel"><div class="inner"></div></div>
 
 <div class="bar" id="bar">
   <b id="barText">0 items</b>
   <button id="openCart">View cart &rarr;</button>
+</div>
+
+<!-- Movie picker -->
+<div class="panel" id="moviePanel">
+  <div class="sheet">
+    <h3>Which movie are you watching?</h3>
+    <div class="hint">We will show your interval time so your food can arrive without disturbing anyone.</div>
+    <div id="movieList"></div>
+    <button class="close" id="skipMovie">Skip</button>
+  </div>
 </div>
 
 <!-- Cart and checkout -->
@@ -160,9 +187,15 @@
     <div id="cartLines"></div>
     <div class="total" id="cartTotal">Total: ₹0</div>
 
+    <label for="cname">Your name</label>
+    <input id="cname" type="text" maxlength="40" placeholder="Name">
+
     <label for="seat">Enter your seat number</label>
     <input id="seat" type="text" maxlength="20" placeholder="e.g. B12">
     <div class="hint">Type your exact theatre seat number</div>
+
+    <label>How do you want your order?</label>
+    <div id="deliveryBox"></div>
 
     <div class="payrow">
       <a class="qrlink" id="qrLink" href="#"><img src="qr.png" alt="Payment QR code"></a>
@@ -181,38 +214,43 @@
   </div>
 </div>
 
-<!-- 10-minute timer screen -->
+<!-- After sending -->
 <div class="timerView" id="timerView">
   <h2>Order received!</h2>
-  <p>Your order is being prepared for seat <strong id="seatShow"></strong>.</p>
-  <div class="ring">
-    <svg width="230" height="230" viewBox="0 0 200 200">
-      <circle cx="100" cy="100" r="90" stroke="#3a1f18" stroke-width="12" fill="none"/>
-      <circle id="ringArc" cx="100" cy="100" r="90" stroke="#F5B942" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="565.5" stroke-dashoffset="0"/>
-    </svg>
-    <div class="num"><b id="timer">10:00</b><span>Remaining</span></div>
-  </div>
-  <div class="note">Your food should reach you within 10 minutes.</div>
-  <div class="call" id="callBox">
-    Your order is taking longer than expected.<br>
-    Please call us: <a href="tel:9744123717">9744123717</a>
+  <div>Your pickup number</div>
+  <div class="pickup" id="pickupNo"></div>
+  <p>Seat <strong id="seatShow"></strong></p>
+  <div class="note" id="deliveryMsg"></div>
+  <div id="timerBlock">
+    <div class="ring">
+      <svg width="230" height="230" viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="90" stroke="#3a1f18" stroke-width="12" fill="none"/>
+        <circle id="ringArc" cx="100" cy="100" r="90" stroke="#F5B942" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="565.5" stroke-dashoffset="0"/>
+      </svg>
+      <div class="num"><b id="timer">10:00</b><span>Remaining</span></div>
+    </div>
+    <div class="call" id="callBox">
+      Your order is taking longer than expected.<br>
+      Please call us: <a href="tel:9744123717">9744123717</a>
+    </div>
   </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, doc, onSnapshot, addDoc, runTransaction, serverTimestamp }
+import { getFirestore, collection, doc, onSnapshot, runTransaction, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 const db = getFirestore(initializeApp(firebaseConfig));
-const SECTIONS = ['Cold Drinks', 'Hot Snacks', 'Lays (Chips)', 'Carbonated Drinks', 'Popcorn'];
+const SECTIONS = ['Cold Drinks', 'Hot Snacks', 'Lays (Chips)', 'Carbonated Drinks', 'Popcorn', 'Ice Creams'];
 const CAT_IMAGES = {
   'Cold Drinks': 'cat-cold-drinks.png',
   'Hot Snacks': 'cat-snacks.png',
   'Lays (Chips)': 'cat-lays.png',
   'Carbonated Drinks': 'cat-carbonated.png',
-  'Popcorn': 'cat-popcorn.png'
+  'Popcorn': 'cat-popcorn.png',
+  'Ice Creams': 'cat-icecream.png'
 };
 const MAX_PHOTO_CHARS = 300000;
 const TOTAL_SECONDS = 600;
@@ -221,67 +259,146 @@ const UPI_ID = '9744123717@superyes';
 const PAYEE = 'Shafaz Grand Canteen';
 
 let products = [];
-const cart = {}; // productId -> qty
+let movies = [];
+let selMovie = null;
+let delivery = '';
+let openCat = null;
+const cart = {};
 
-// ---------- Live menu ----------
+const $ = id => document.getElementById(id);
+function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-'); }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
+function fmt12(d) { return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); }
+
+// ---------- Movies and interval ----------
+function timesFor(m) {
+  const [h, mi] = String(m.start).split(':').map(Number);
+  const s = new Date(); s.setHours(h, mi, 0, 0);
+  const i = new Date(s.getTime() + Number(m.intervalMin) * 60000);
+  return { s, i };
+}
+function movieLabel(m) { return m.name + ' (' + fmt12(timesFor(m).s) + ')'; }
+
+onSnapshot(collection(db, 'movies'), (snap) => {
+  movies = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => String(a.start).localeCompare(String(b.start)));
+  selMovie = movies.find(m => m.id === sessionStorage.getItem('movieId')) || null;
+  if (movies.length && !selMovie && !sessionStorage.getItem('movieSkip')) openMoviePicker();
+  renderMovieBar();
+});
+
+function openMoviePicker() {
+  $('movieList').innerHTML = movies.map(m =>
+    `<button class="movbtn" data-mid="${esc(m.id)}">${esc(movieLabel(m))}</button>`).join('');
+  $('moviePanel').style.display = 'block';
+}
+$('movieList').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-mid]');
+  if (!b) return;
+  sessionStorage.setItem('movieId', b.dataset.mid);
+  sessionStorage.removeItem('movieSkip');
+  selMovie = movies.find(m => m.id === b.dataset.mid) || null;
+  $('moviePanel').style.display = 'none';
+  renderMovieBar();
+});
+$('skipMovie').addEventListener('click', () => {
+  sessionStorage.setItem('movieSkip', '1');
+  $('moviePanel').style.display = 'none';
+});
+
+function deliveryState() {
+  if (!selMovie) return { mode: 'free' };
+  const { i } = timesFor(selMovie);
+  return new Date() >= i ? { mode: 'door', i } : { mode: 'interval', i };
+}
+
+function renderMovieBar() {
+  const bar = $('movBar');
+  if (!selMovie) {
+    bar.style.display = movies.length ? 'block' : 'none';
+    bar.innerHTML = movies.length ? '<button id="pickMovie" style="margin:0">Select your movie</button>' : '';
+    return;
+  }
+  const { s, i } = timesFor(selMovie);
+  const st = deliveryState();
+  bar.style.display = 'block';
+  bar.innerHTML = `<b>${esc(selMovie.name)}</b> · starts ${fmt12(s)} · <b>interval at ${fmt12(i)}</b>
+    <button id="pickMovie">Change</button>` +
+    (st.mode === 'door'
+      ? '<span class="warn">The interval has passed. Please collect your order at the theatre door.</span>'
+      : '<span class="warn">Please order for interval delivery so other viewers are not disturbed.</span>');
+  if ($('cartPanel').style.display === 'block') renderDelivery();
+}
+$('movBar').addEventListener('click', (e) => { if (e.target.id === 'pickMovie') openMoviePicker(); });
+setInterval(renderMovieBar, 30000);
+
+// ---------- Products ----------
 onSnapshot(collection(db, 'products'), (snap) => {
   products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
   renderCategories();
-  renderMenu();
+  renderPanel(false);
   renderBar();
 });
 
 function stockClass(s) { return s === 0 ? 'out' : (s <= 5 ? 'low' : ''); }
-function stockText(s) { return s === 0 ? 'Sold Out' : (s === 1 ? '1 left' : s + ' left'); }
+function stockText(s) { return s <= 0 ? 'Sold Out' : (s === 1 ? '1 left' : s + ' left'); }
 
-// Category row: each card uses its own picture, jumps to its section, shows the lowest price
 function renderCategories() {
-  document.getElementById('cats').innerHTML = SECTIONS.map(sec => {
+  $('cats').innerHTML = SECTIONS.map(sec => {
     const items = products.filter(p => p.section === sec);
     const minPrice = items.length ? Math.min(...items.map(p => Number(p.price) || 0)) : null;
-    return `<a class="catcard" href="#sec-${slug(sec)}">
-      <img src="${CAT_IMAGES[sec]}" alt="${esc(sec)}" onerror="this.src='shafaz-logo.png'">
+    return `<button class="catcard${openCat === sec ? ' active' : ''}" data-cat="${esc(sec)}">
+      <img src="${CAT_IMAGES[sec]}" alt="" onerror="this.src='shafaz-logo.png'">
       <div class="n">${esc(sec)}</div>
       <div class="f">${minPrice !== null ? 'From ₹' + minPrice : 'Coming soon'}</div>
-    </a>`;
+    </button>`;
   }).join('');
 }
 
-function renderMenu() {
-  const menu = document.getElementById('menu');
-  menu.innerHTML = '';
-  SECTIONS.forEach(sec => {
-    const items = products.filter(p => p.section === sec);
-    const wrap = document.createElement('section');
-    wrap.className = 'sec';
-    wrap.id = 'sec-' + slug(sec);
-    wrap.innerHTML = `<h2>${esc(sec)}</h2><div class="grid"></div>`;
-    const grid = wrap.querySelector('.grid');
-    if (items.length === 0) grid.innerHTML = '<p class="empty" style="grid-column:1/-1;">No items yet</p>';
-    items.forEach(p => {
-      const qtyInCart = cart[p.id] || 0;
-      const soldOut = p.stock <= 0;
-      const card = document.createElement('div');
-      card.className = 'card' + (soldOut ? ' soldout' : '');
-      card.innerHTML = `
-        <div class="pic">${p.photo ? `<img src="${p.photo}" alt="">` : '<span style="color:#999;font-size:12px;">No photo</span>'}</div>
-        <div class="name">${esc(p.name)}</div>
-        <div class="row">
-          <span class="price">₹${p.price}</span>
-          <span class="left ${stockClass(p.stock)}">${stockText(p.stock)}</span>
-        </div>
-        ${soldOut
-          ? '<button class="add" disabled>Sold Out</button>'
-          : (qtyInCart === 0
-              ? `<button class="add" data-id="${p.id}" data-act="add">Add to Cart</button>`
-              : `<div class="qty"><button data-id="${p.id}" data-act="minus">−</button><span>${qtyInCart}</span><button data-id="${p.id}" data-act="plus">+</button></div>`)}`;
-      grid.appendChild(card);
-    });
-    menu.appendChild(wrap);
-  });
+function cardHtml(p) {
+  const q = cart[p.id] || 0;
+  const out = p.stock <= 0;
+  return `<div class="card${out ? ' soldout' : ''}">
+    <div class="pic">${p.photo ? `<img src="${p.photo}" alt="">` : '<span style="color:#999;font-size:12px;">No photo</span>'}</div>
+    <div class="name">${esc(p.name)}</div>
+    <div class="row"><span class="price">₹${p.price}</span><span class="left ${stockClass(p.stock)}">${stockText(p.stock)}</span></div>
+    ${out ? '<button class="add" disabled>Sold Out</button>'
+      : (q === 0 ? `<button class="add" data-id="${p.id}" data-act="add">Add to Cart</button>`
+        : `<div class="qty"><button data-id="${p.id}" data-act="minus">−</button><span>${q}</span><button data-id="${p.id}" data-act="plus">+</button></div>`)}
+  </div>`;
 }
 
-document.getElementById('menu').addEventListener('click', (e) => {
+// The category (or search result) opens in place under the category row
+function renderPanel(scroll) {
+  const q = $('q').value.trim().toLowerCase();
+  const only = $('inStock').checked;
+  const panel = $('catPanel');
+  const inner = panel.firstElementChild;
+  let list = null, title = '';
+  if (q) { list = products.filter(p => String(p.name).toLowerCase().includes(q)); title = 'Results for “' + q + '”'; }
+  else if (openCat) { list = products.filter(p => p.section === openCat); title = openCat; }
+  else if (only) { list = products; title = 'All items in stock'; }
+  if (list === null) { panel.classList.remove('open'); return; }
+  if (only) list = list.filter(p => p.stock > 0);
+  inner.innerHTML = `<div class="panelhead"><h2>${esc(title)}</h2>${openCat && !q ? '<button data-close="1">Close ✕</button>' : ''}</div>
+    <div class="grid">${list.map(cardHtml).join('') || '<p class="empty" style="grid-column:1/-1;">No items found</p>'}</div>`;
+  panel.classList.add('open');
+  if (scroll) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+$('cats').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-cat]');
+  if (!b) return;
+  openCat = openCat === b.dataset.cat ? null : b.dataset.cat;
+  $('q').value = '';
+  renderCategories();
+  renderPanel(true);
+});
+$('q').addEventListener('input', () => renderPanel(false));
+$('inStock').addEventListener('change', () => renderPanel(false));
+
+$('catPanel').addEventListener('click', (e) => {
+  if (e.target.closest('[data-close]')) { openCat = null; renderCategories(); renderPanel(false); return; }
   const b = e.target.closest('button[data-act]');
   if (!b) return;
   const id = b.dataset.id;
@@ -294,83 +411,88 @@ document.getElementById('menu').addEventListener('click', (e) => {
   } else if (b.dataset.act === 'minus') {
     if (cur - 1 <= 0) delete cart[id]; else cart[id] = cur - 1;
   }
-  renderMenu();
+  renderPanel(false);
   renderBar();
 });
 
+// ---------- Cart ----------
 function cartLines() {
   return Object.keys(cart).map(id => {
     const p = products.find(x => x.id === id);
     return p ? { id, name: p.name, price: Number(p.price), qty: cart[id], stock: p.stock } : null;
   }).filter(Boolean);
 }
-
-function cartTotal() {
-  return cartLines().reduce((s, l) => s + l.qty * l.price, 0);
-}
+function cartTotal() { return cartLines().reduce((s, l) => s + l.qty * l.price, 0); }
 
 function renderBar() {
   const lines = cartLines();
   const count = lines.reduce((s, l) => s + l.qty, 0);
-  const total = cartTotal();
-  document.getElementById('bar').style.display = count > 0 ? 'flex' : 'none';
-  document.getElementById('barText').textContent = `${count} item${count === 1 ? '' : 's'} · ₹${total}`;
-  const badge = document.getElementById('cartBadge');
+  $('bar').style.display = count > 0 ? 'flex' : 'none';
+  $('barText').textContent = `${count} item${count === 1 ? '' : 's'} · ₹${cartTotal()}`;
+  const badge = $('cartBadge');
   badge.textContent = count;
   badge.style.display = count > 0 ? 'block' : 'none';
 }
 
+function renderDelivery() {
+  const st = deliveryState();
+  let opts, note = '';
+  if (st.mode === 'interval') {
+    opts = [['Interval seat delivery', 'Deliver to my seat at the interval (' + fmt12(st.i) + ')'],
+            ['Counter pickup', 'I will collect at the counter']];
+    note = 'Please order for interval delivery so other viewers are not disturbed.';
+  } else if (st.mode === 'door') {
+    opts = [['Door pickup', 'I will collect at the theatre door']];
+    note = 'The interval has already passed. Please collect your order at the theatre door.';
+  } else {
+    opts = [['Counter pickup', 'Pickup at the counter'], ['Seat delivery', 'Deliver to my seat']];
+  }
+  if (!opts.some(o => o[0] === delivery)) delivery = opts[0][0];
+  $('deliveryBox').innerHTML = opts.map(o =>
+    `<label class="opt"><input type="radio" name="dlv" value="${o[0]}"${o[0] === delivery ? ' checked' : ''}><span>${o[1]}</span></label>`).join('') +
+    (note ? `<div class="dnote">${note}</div>` : '');
+}
+$('deliveryBox').addEventListener('change', (e) => { if (e.target.name === 'dlv') delivery = e.target.value; });
+
 function renderCart() {
   const lines = cartLines();
-  const total = cartTotal();
-  document.getElementById('cartLines').innerHTML = lines.map(l =>
+  $('cartLines').innerHTML = lines.map(l =>
     `<div class="line"><span>${esc(l.name)} × ${l.qty}</span><span>₹${l.qty * l.price}</span></div>`).join('')
     || '<p class="empty">Your cart is empty.</p>';
-  document.getElementById('cartTotal').textContent = 'Total: ₹' + total;
+  $('cartTotal').textContent = 'Total: ₹' + cartTotal();
+  renderDelivery();
   updatePayLinks();
 }
 
-// Builds the UPI payment link with the cart total and the seat as the note
 function updatePayLinks() {
-  const total = cartTotal();
-  const seat = document.getElementById('seat').value.trim();
+  const seat = $('seat').value.trim();
   const note = seat ? 'Seat ' + seat : 'Shafaz Canteen order';
   const link = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE)}` +
-               `&am=${total}&cu=INR&tn=${encodeURIComponent(note)}`;
-  document.getElementById('upiLink').href = link;
-  document.getElementById('qrLink').href = link;
+               `&am=${cartTotal()}&cu=INR&tn=${encodeURIComponent(note)}`;
+  $('upiLink').href = link;
+  $('qrLink').href = link;
 }
 
-function openCart() {
-  renderCart();
-  document.getElementById('cartPanel').style.display = 'block';
-}
-document.getElementById('openCart').addEventListener('click', openCart);
-document.getElementById('topCart').addEventListener('click', openCart);
-document.getElementById('cartIcon').addEventListener('click', openCart);
-document.getElementById('closeCart').addEventListener('click', () => {
-  document.getElementById('cartPanel').style.display = 'none';
-});
-document.getElementById('seat').addEventListener('input', updatePayLinks);
+function openCart() { renderCart(); $('cartPanel').style.display = 'block'; }
+$('openCart').addEventListener('click', openCart);
+$('topCart').addEventListener('click', openCart);
+$('cartIcon').addEventListener('click', openCart);
+$('closeCart').addEventListener('click', () => { $('cartPanel').style.display = 'none'; });
+$('seat').addEventListener('input', updatePayLinks);
 
-// Stop the link opening if the cart is empty
 ['upiLink', 'qrLink'].forEach(id => {
-  document.getElementById(id).addEventListener('click', (e) => {
-    if (cartTotal() === 0) {
-      e.preventDefault();
-      document.getElementById('msg').textContent = 'Add items to your cart first.';
-    }
+  $(id).addEventListener('click', (e) => {
+    if (cartTotal() === 0) { e.preventDefault(); $('msg').textContent = 'Add items to your cart first.'; }
   });
 });
 
-document.getElementById('payShot').addEventListener('change', (e) => {
+$('payShot').addEventListener('change', (e) => {
   const f = e.target.files[0];
-  const img = document.getElementById('payPreview');
+  const img = $('payPreview');
   if (f) { img.src = URL.createObjectURL(f); img.style.display = 'block'; }
   else img.style.display = 'none';
 });
 
-// Shrink the screenshot so it fits in the database
 async function compressImage(file) {
   const url = URL.createObjectURL(file);
   const img = await new Promise((resolve, reject) => {
@@ -390,37 +512,32 @@ async function compressImage(file) {
   return out;
 }
 
-// 10-minute countdown with the gold ring
 function startTimer() {
   let left = TOTAL_SECONDS;
-  const t = document.getElementById('timer');
-  const arc = document.getElementById('ringArc');
+  const arc = $('ringArc');
   const fmt = s => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
   const draw = () => {
-    t.textContent = fmt(Math.max(left, 0));
+    $('timer').textContent = fmt(Math.max(left, 0));
     arc.setAttribute('stroke-dashoffset', String(RING_LEN * (1 - Math.max(left, 0) / TOTAL_SECONDS)));
   };
   draw();
   const iv = setInterval(() => {
-    left--;
-    draw();
-    if (left <= 0) {
-      clearInterval(iv);
-      document.getElementById('callBox').style.display = 'block';
-    }
+    left--; draw();
+    if (left <= 0) { clearInterval(iv); $('callBox').style.display = 'block'; }
   }, 1000);
 }
 
-document.getElementById('send').addEventListener('click', async () => {
-  const msg = document.getElementById('msg');
-  const btn = document.getElementById('send');
+// ---------- Send order ----------
+$('send').addEventListener('click', async () => {
+  const msg = $('msg'), btn = $('send');
   const showErr = t => { msg.textContent = t; };
-
-  const seat = document.getElementById('seat').value.trim();
+  const name = $('cname').value.trim();
+  const seat = $('seat').value.trim();
   const lines = cartLines();
   if (lines.length === 0) return showErr('Your cart is empty.');
+  if (!name) return showErr('Please type your name.');
   if (!seat) return showErr('Please type your seat number.');
-  const shot = document.getElementById('payShot').files[0];
+  const shot = $('payShot').files[0];
   if (!shot) return showErr('Please upload your payment screenshot.');
 
   btn.disabled = true; btn.textContent = 'Sending...';
@@ -428,30 +545,49 @@ document.getElementById('send').addEventListener('click', async () => {
     const paymentPhoto = await compressImage(shot);
     const total = cartTotal();
     const items = lines.map(l => ({ id: l.id, name: l.name, price: l.price, qty: l.qty }));
+    const movie = selMovie ? movieLabel(selMovie) : '';
+    const dlv = delivery;
+    const stBefore = deliveryState();
+    const counterRef = doc(db, 'counters', 'orders');
+    const orderRef = doc(collection(db, 'orders'));
+    let pickupNo = '';
 
-    // Reduce stock for every item in one safe step. If any item is short, nothing is saved.
+    // Stock, pickup number and order are saved together, or not at all
     await runTransaction(db, async (tx) => {
       const refs = lines.map(l => doc(db, 'products', l.id));
       const snaps = await Promise.all(refs.map(r => tx.get(r)));
+      const cs = await tx.get(counterRef);
       snaps.forEach((s, i) => {
         const have = s.exists() ? s.data().stock : 0;
         if (have < lines[i].qty) throw new Error(`Only ${have} of ${lines[i].name} left.`);
       });
-      snaps.forEach((s, i) => {
-        tx.update(refs[i], { stock: s.data().stock - lines[i].qty });
-      });
-    });
-
-    await addDoc(collection(db, 'orders'), {
-      seat, items, total, paymentPhoto, status: 'Pending', time: serverTimestamp()
+      const n = cs.exists() ? cs.data().n + 1 : 1001;
+      pickupNo = 'SGC-' + n;
+      snaps.forEach((s, i) => tx.update(refs[i], { stock: s.data().stock - lines[i].qty }));
+      if (cs.exists()) tx.update(counterRef, { n }); else tx.set(counterRef, { n });
+      tx.set(orderRef, { seat, name, items, total, paymentPhoto, status: 'Pending', time: serverTimestamp(),
+                         pickupNo, delivery: dlv, movie });
     });
 
     Object.keys(cart).forEach(k => delete cart[k]);
-    document.getElementById('cartPanel').style.display = 'none';
-    document.getElementById('bar').style.display = 'none';
-    document.getElementById('seatShow').textContent = seat;
-    document.getElementById('timerView').style.display = 'block';
-    startTimer();
+    $('cartPanel').style.display = 'none';
+    $('bar').style.display = 'none';
+    $('pickupNo').textContent = pickupNo;
+    $('seatShow').textContent = seat;
+    let text = '';
+    if (dlv === 'Interval seat delivery') {
+      text = 'Your order will be delivered to your seat at the interval (' + fmt12(stBefore.i) + '). Please keep your pickup number ready.';
+      $('timerBlock').style.display = 'none';
+    } else if (dlv === 'Door pickup') {
+      text = 'Please collect your order at the theatre door and show your pickup number.';
+    } else if (dlv === 'Seat delivery') {
+      text = 'Your order will be brought to your seat. Please keep your pickup number ready.';
+    } else {
+      text = 'Please collect your order at the counter and show your pickup number.';
+    }
+    $('deliveryMsg').textContent = text;
+    $('timerView').style.display = 'block';
+    if (dlv !== 'Interval seat delivery') startTimer();
   } catch (err) {
     showErr(err.message && (err.message.startsWith('Only') || err.message.startsWith('Screenshot'))
       ? err.message : 'Could not send. Please try again.');
@@ -459,8 +595,7 @@ document.getElementById('send').addEventListener('click', async () => {
   }
 });
 
-function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-'); }
-function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
+renderCategories();
 </script>
 </body>
 </html>
