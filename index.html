@@ -34,21 +34,35 @@
   .top .right { display:flex; align-items:center; gap:10px; }
   .cartbtn { position:relative; background:none; border:0; color:var(--gold); font-size:22px; padding:4px; cursor:pointer; }
   .badge { position:absolute; top:-4px; right:-6px; background:var(--red); color:#fff; border-radius:50%; font-size:11px; min-width:18px; height:18px; line-height:18px; text-align:center; font-weight:bold; display:none; }
-  .pill { background:var(--gold); color:#2a1606; border:0; border-radius:20px; padding:8px 12px; font-weight:bold; font-size:13px; }
+  .pill { background:var(--gold); color:#2a1606; border:0; border-radius:20px; padding:8px 12px; font-weight:bold; font-size:13px; text-decoration:none; }
 
-  .hero { position:relative; margin:12px; border-radius:20px; overflow:hidden; min-height:300px; background:#1a0b0b url('theatre.png') center center/cover no-repeat; border:1px solid rgba(245,185,66,.3); }
+  /* Banner with scrolling category tabs */
+  .hero { position:relative; margin:12px; border-radius:20px; overflow:hidden; min-height:380px; background:#1a0b0b url('theatre.png') center center/cover no-repeat; border:1px solid rgba(245,185,66,.3); }
   .hero::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(14,6,6,.8) 0%, rgba(14,6,6,.35) 50%, rgba(14,6,6,0) 100%); }
-  .hero img.pic { position:absolute; right:0; bottom:0; height:92%; max-width:45%; object-fit:contain; z-index:1; }
+  .hero img.pic { position:absolute; right:0; bottom:112px; height:55%; max-width:45%; object-fit:contain; z-index:1; }
   .hero .txt { position:relative; z-index:2; padding:24px 18px; max-width:60%; text-shadow:0 2px 8px rgba(0,0,0,.7); }
   .hero h1 { margin:0; font-size:28px; line-height:1.15; color:var(--text); font-weight:700; }
   .hero h1 span { color:var(--gold); display:block; font-size:34px; font-weight:900; }
   .hero p { color:#f1e2cc; font-size:14px; margin:10px 0 16px; }
   .cta { display:inline-block; background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#2a1606; font-weight:bold; border:0; border-radius:14px; padding:12px 20px; font-size:15px; text-decoration:none; }
+  .htabs { position:absolute; left:0; right:0; bottom:10px; z-index:3; display:flex; gap:10px; overflow-x:auto; padding:0 12px; scrollbar-width:none; }
+  .htabs::-webkit-scrollbar { display:none; }
+  .htab { flex:0 0 auto; width:78px; background:rgba(14,6,6,.78); border:1px solid rgba(245,185,66,.6); border-radius:14px; padding:6px 4px; color:var(--text); font-family:inherit; font-size:11px; font-weight:bold; text-align:center; cursor:pointer; }
+  .htab img { width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:10px; display:block; margin-bottom:4px; }
 
   .movbar { display:none; margin:0 12px 10px; background:#24100c; border:1px solid rgba(245,185,66,.4); border-radius:16px; padding:12px; font-size:14px; line-height:1.5; }
   .movbar b { color:var(--gold); }
   .movbar button { background:none; border:1px solid var(--gold); color:var(--gold); border-radius:10px; padding:4px 10px; margin-left:8px; font-size:12px; }
   .movbar .warn { color:#ffb24d; font-weight:bold; display:block; margin-top:4px; }
+
+  /* Shafaz Points card */
+  .ptsbar { margin:0 12px 12px; background:linear-gradient(135deg,#2a1608,#1a0b0b); border:1px solid rgba(245,185,66,.5); border-radius:16px; padding:12px 14px; font-size:14px; line-height:1.5; }
+  .ptsbar b { color:var(--gold); }
+  .ptsbar .big { font-size:22px; font-weight:900; color:var(--gold2); }
+  .meter { height:8px; background:#3a1f18; border-radius:6px; overflow:hidden; margin:6px 0; }
+  .meter i { display:block; height:100%; background:linear-gradient(90deg,var(--gold),var(--gold2)); }
+  .gbtn { background:#fff; color:#222; border:0; border-radius:12px; padding:9px 14px; font-weight:bold; font-size:14px; margin-top:6px; }
+  .linkbtn { background:none; border:0; color:var(--muted); text-decoration:underline; font-size:12px; margin-left:8px; }
 
   .title { text-align:center; margin:22px 0 12px; font-size:20px; font-weight:800; color:var(--gold); position:relative; }
   .title::before, .title::after { content:""; position:absolute; top:50%; width:22%; height:1px; background:linear-gradient(90deg,transparent,var(--gold)); }
@@ -93,23 +107,37 @@
   .qty span { font-weight:bold; font-size:16px; }
   .empty { color:var(--muted); padding:10px 4px; }
 
+  /* Customer care */
+  .care { margin:18px 12px 0; background:var(--panel); border:1px solid rgba(245,185,66,.35); border-radius:18px; padding:16px; text-align:center; }
+  .care h2 { margin:0 0 6px; color:var(--gold); font-size:20px; }
+  .care p { color:var(--muted); font-size:14px; line-height:1.5; margin:6px 0; }
+  .carebtn { display:inline-block; margin:6px 4px 0; padding:11px 18px; border-radius:14px; font-weight:bold; font-size:15px; text-decoration:none; }
+  .carebtn.call { background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#2a1606; }
+  .carebtn.wa { background:#25D366; color:#073b1a; }
+
   .bar { position:fixed; left:12px; right:12px; bottom:12px; background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#2a1606; padding:12px 16px; border-radius:18px; display:none; justify-content:space-between; align-items:center; z-index:10; box-shadow:0 8px 24px rgba(0,0,0,.5); }
   .bar b { font-size:15px; }
   .bar button { background:#2a1606; color:var(--gold); border:0; padding:10px 16px; border-radius:12px; font-weight:bold; font-size:14px; }
 
   .panel { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:20; overflow-y:auto; }
+  #rulesPanel { z-index:40; }
   .sheet { background:var(--panel); border:1px solid rgba(245,185,66,.35); margin:24px auto; max-width:480px; border-radius:22px; padding:18px; }
   .sheet h3 { color:var(--gold); margin:0 0 10px; font-size:20px; }
+  .rule { background:#24100c; border-left:4px solid var(--gold); border-radius:10px; padding:10px 12px; margin-top:10px; font-size:14px; line-height:1.5; }
+  .rule b { color:var(--gold2); display:block; margin-bottom:2px; }
   .line { display:flex; justify-content:space-between; align-items:flex-start; padding:8px 0; border-bottom:1px solid rgba(245,185,66,.15); font-size:15px; }
   .coldtick { display:flex; align-items:center; gap:6px; margin:4px 0 0; font-size:13px; font-weight:bold; color:#8fd3ff; }
   .coldtick input { width:18px; height:18px; }
-  .total { font-size:20px; font-weight:900; color:var(--gold); padding:12px 0; }
+  .srow { display:flex; justify-content:space-between; padding:6px 0; font-size:15px; }
+  .srow.free { color:var(--green); font-weight:bold; }
+  .total { font-size:20px; font-weight:900; color:var(--gold); padding:10px 0 4px; }
   label { display:block; font-weight:bold; margin-top:14px; font-size:14px; color:var(--gold2); }
   input[type=text] { width:100%; padding:12px; font-size:16px; border:1px solid var(--gold); border-radius:12px; background:#24100c; color:var(--text); margin-top:6px; }
   .hint { color:var(--muted); font-size:12px; margin-top:4px; }
   .opt { display:flex; gap:10px; align-items:flex-start; background:#24100c; border:1px solid rgba(245,185,66,.3); border-radius:12px; padding:10px; margin-top:8px; font-weight:normal; color:var(--text); }
   .opt input { margin-top:3px; }
   .dnote { color:#ffb24d; font-size:13px; margin-top:8px; font-weight:bold; }
+  .cartpts { background:#24100c; border:1px dashed rgba(245,185,66,.5); border-radius:12px; padding:10px; margin-top:10px; font-size:13px; color:var(--gold2); }
   .movbtn { display:block; width:100%; text-align:left; margin-top:8px; padding:12px; border-radius:12px; border:1px solid var(--gold); background:#24100c; color:var(--text); font-size:15px; }
   .payrow { display:flex; gap:14px; align-items:center; margin-top:14px; background:#24100c; border-radius:16px; padding:12px; }
   .payrow a.qrlink { display:block; flex-shrink:0; }
@@ -143,6 +171,7 @@
 <header class="top">
   <img src="shafaz-logo.png" alt="Shafaz Canteen">
   <div class="right">
+    <a class="pill" href="#care">Help</a>
     <button class="cartbtn" id="cartIcon" title="Cart">&#128722;<span class="badge" id="cartBadge">0</span></button>
     <button class="pill" id="topCart">View cart</button>
   </div>
@@ -155,10 +184,12 @@
     <a class="cta" href="#menu-top">Order Now &rarr;</a>
   </div>
   <img class="pic" src="hero.png" alt="" onerror="this.style.display='none'">
+  <div class="htabs" id="heroTabs"></div>
 </section>
 
 <div class="movbar" id="seatBar"></div>
 <div class="movbar" id="movBar"></div>
+<div class="ptsbar" id="ptsBar"></div>
 
 <div class="title" id="menu-top">Our Categories</div>
 
@@ -177,9 +208,28 @@
 <nav class="cats" id="cats"></nav>
 <div class="catpanel" id="catPanel"><div class="inner"></div></div>
 
+<section class="care" id="care">
+  <h2>Customer care</h2>
+  <p>Problem with your order, payment or delivery? Call or message us. Please keep your pickup number ready (for example SGC-1025).</p>
+  <a class="carebtn call" href="tel:9744123717">📞 Call 9744123717</a>
+  <a class="carebtn wa" href="https://wa.me/919744123717?text=Hello%20Shafaz%20Canteen%2C%20I%20need%20help%20with%20my%20order." target="_blank" rel="noopener">💬 WhatsApp</a>
+</section>
+
 <div class="bar" id="bar">
   <b id="barText">0 items</b>
   <button id="openCart">View cart &rarr;</button>
+</div>
+
+<!-- Rules popup -->
+<div class="panel" id="rulesPanel">
+  <div class="sheet">
+    <h3>Before you order</h3>
+    <div class="rule"><b>Ordering after the movie has started</b>Please wait near the doorstep. Otherwise our staff have to walk past other viewers to deliver your food, which disturbs them.</div>
+    <div class="rule"><b>Side seats and middle seats</b>If you are in a side seat, that is not an issue. If you are in the middle seats, please come up to the door to collect your order once the show starts, so that nobody is disturbed. The items will be brought right up to the door.</div>
+    <div class="rule"><b>Minimum order</b>The minimum order value is ₹50.</div>
+    <div class="rule"><b>Shafaz Points</b>Sign in with Google and you earn 1 point for every product you buy. Once you reach 100 points, you can redeem them for a free popcorn.</div>
+    <button class="primary" id="rulesOk">I understand</button>
+  </div>
 </div>
 
 <!-- Movie picker -->
@@ -197,7 +247,9 @@
   <div class="sheet">
     <h3>Your order</h3>
     <div id="cartLines"></div>
-    <div class="total" id="cartTotal">Total: ₹0</div>
+    <div id="redeemBox"></div>
+    <div id="cartSum"></div>
+    <div id="cartPts"></div>
 
     <label for="cname">Your name</label>
     <input id="cname" type="text" maxlength="40" placeholder="Name">
@@ -233,6 +285,7 @@
   <div class="pickup" id="pickupNo"></div>
   <p>Seat <strong id="seatShow"></strong></p>
   <div class="note" id="deliveryMsg"></div>
+  <div class="note" id="pointsMsg" style="display:none;"></div>
   <div id="timerBlock">
     <div class="ring">
       <svg width="230" height="230" viewBox="0 0 200 200">
@@ -253,9 +306,14 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, collection, doc, onSnapshot, runTransaction, serverTimestamp }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { firebaseConfig } from "./firebase-config.js";
 
-const db = getFirestore(initializeApp(firebaseConfig));
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
 const SECTIONS = ['Cold Drinks', 'Hot Snacks', 'Lays (Chips)', 'Carbonated Drinks', 'Popcorn', 'Ice Creams'];
 const DRINK_SECTIONS = ['Cold Drinks', 'Carbonated Drinks'];
 const CAT_IMAGES = {
@@ -267,6 +325,10 @@ const CAT_IMAGES = {
   'Ice Creams': 'cat-icecream.png'
 };
 const HALL = 'Hall entrance delivery';
+const TIP = 10;            // delivery boy tip, added to every order
+const MIN_ORDER = 50;      // minimum items value
+const REDEEM_POINTS = 100; // points for a free popcorn
+const MAX_EARN = 100;      // most points one order can earn
 const MAX_PHOTO_CHARS = 300000;
 const TOTAL_SECONDS = 600;
 const RING_LEN = 565.5;
@@ -279,6 +341,10 @@ let movies = [];
 let selMovie = null;
 let delivery = '';
 let openCat = null;
+let currentUser = null;
+let points = 0;
+let useRedeem = false;
+let unsubPoints = null;
 const cart = {};
 const coldPref = {};
 
@@ -286,20 +352,70 @@ const $ = id => document.getElementById(id);
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
 function fmt12(d) { return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); }
 
+// ---------- Rules popup (once per visit) ----------
+if (!sessionStorage.getItem('rulesSeen')) $('rulesPanel').style.display = 'block';
+$('rulesOk').addEventListener('click', () => {
+  sessionStorage.setItem('rulesSeen', '1');
+  $('rulesPanel').style.display = 'none';
+});
+
 // ---------- Seat QR: ?screen=2&row=B&seat=12 ----------
 (function seatFromQr() {
   const p = new URLSearchParams(location.search);
   const clean = (v, n) => (p.get(v) || '').replace(/[^A-Za-z0-9 -]/g, '').trim().slice(0, n);
   const screen = clean('screen', 3), row = clean('row', 3), seat = clean('seat', 4);
   if (!row && !seat) return;
-  const text = (screen ? 'Screen ' + screen + ' ' : '') + row + seat;
-  $('seat').value = text.slice(0, 20);
+  $('seat').value = ((screen ? 'Screen ' + screen + ' ' : '') + row + seat).slice(0, 20);
   const bar = $('seatBar');
   bar.style.display = 'block';
   bar.innerHTML = '📍 ' + (screen ? 'Screen <b>' + esc(screen) + '</b> · ' : '') +
     (row ? 'Row <b>' + esc(row) + '</b> · ' : '') + (seat ? 'Seat <b>' + esc(seat) + '</b>' : '') +
     ' <span style="color:var(--muted)">(from your seat QR)</span>';
 })();
+
+// ---------- Google sign-in and Shafaz Points ----------
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
+  if (unsubPoints) { unsubPoints(); unsubPoints = null; }
+  points = 0;
+  if (user) {
+    unsubPoints = onSnapshot(doc(db, 'customers', user.uid), (s) => {
+      points = s.exists() ? Number(s.data().points) || 0 : 0;
+      renderPoints();
+      if ($('cartPanel').style.display === 'block') renderCart();
+    }, () => { points = 0; renderPoints(); });
+  }
+  renderPoints();
+  if ($('cartPanel').style.display === 'block') renderCart();
+});
+
+function signIn() {
+  signInWithPopup(auth, new GoogleAuthProvider()).catch((e) => {
+    if (e && e.code === 'auth/popup-closed-by-user') return;
+    alert('Google sign-in did not work. Please open this page in Chrome or Safari and try again.');
+  });
+}
+document.addEventListener('click', (e) => {
+  if (e.target.closest('[data-signin]')) signIn();
+  if (e.target.closest('[data-signout]')) signOut(auth);
+});
+
+function renderPoints() {
+  const bar = $('ptsBar');
+  if (!currentUser) {
+    bar.innerHTML = `⭐ <b>Shafaz Points</b><br>Sign in with Google to earn 1 point for every product you buy.
+      Reach ${REDEEM_POINTS} points and get a free popcorn.<br><button class="gbtn" data-signin="1">Sign in with Google</button>`;
+    return;
+  }
+  const first = (currentUser.displayName || 'there').split(' ')[0];
+  const pct = Math.min(100, Math.round(points * 100 / REDEEM_POINTS));
+  bar.innerHTML = `Hi <b>${esc(first)}</b> <button class="linkbtn" data-signout="1">Sign out</button><br>
+    ⭐ Shafaz Points: <span class="big">${points}</span> / ${REDEEM_POINTS}
+    <div class="meter"><i style="width:${pct}%"></i></div>` +
+    (points >= REDEEM_POINTS
+      ? '<b>You can redeem a free popcorn in your cart!</b>'
+      : `${REDEEM_POINTS - points} more points for a free popcorn.`);
+}
 
 // ---------- Movies and interval ----------
 function timesFor(m) {
@@ -363,10 +479,25 @@ function renderMovieBar() {
 $('movBar').addEventListener('click', (e) => { if (e.target.id === 'pickMovie') openMoviePicker(); });
 setInterval(renderMovieBar, 30000);
 
+// ---------- Banner tabs (auto-scrolling) ----------
+$('heroTabs').innerHTML = SECTIONS.map(sec =>
+  `<button class="htab" data-cat="${esc(sec)}"><img src="${CAT_IMAGES[sec]}" alt="" onerror="this.src='shafaz-logo.png'">${esc(sec)}</button>`).join('');
+(function autoScrollTabs() {
+  const strip = $('heroTabs');
+  let hold = false, timer = null;
+  const pause = () => { hold = true; clearTimeout(timer); timer = setTimeout(() => { hold = false; }, 3000); };
+  ['touchstart', 'mousedown', 'wheel'].forEach(ev => strip.addEventListener(ev, pause, { passive: true }));
+  setInterval(() => {
+    if (hold) return;
+    const max = strip.scrollWidth - strip.clientWidth;
+    if (max <= 0) return;
+    strip.scrollLeft = strip.scrollLeft >= max - 2 ? 0 : strip.scrollLeft + 1;
+  }, 30);
+})();
+
 // ---------- Products ----------
 onSnapshot(collection(db, 'products'), (snap) => {
   products = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  // Popular = the 3 most ordered items
   popular = new Set(products.filter(p => Number(p.sold) > 0)
     .sort((a, b) => Number(b.sold) - Number(a.sold)).slice(0, 3).map(p => p.id));
   renderCategories();
@@ -430,14 +561,14 @@ function renderPanel(scroll) {
   if (scroll) panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
-$('cats').addEventListener('click', (e) => {
-  const b = e.target.closest('[data-cat]');
-  if (!b) return;
-  openCat = openCat === b.dataset.cat ? null : b.dataset.cat;
+function selectCat(c) {
+  openCat = openCat === c ? null : c;
   $('q').value = '';
   renderCategories();
   renderPanel(true);
-});
+}
+$('cats').addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) selectCat(b.dataset.cat); });
+$('heroTabs').addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) selectCat(b.dataset.cat); });
 $('q').addEventListener('input', () => renderPanel(false));
 $('inStock').addEventListener('change', () => renderPanel(false));
 $('priceF').addEventListener('change', () => renderPanel(false));
@@ -465,18 +596,35 @@ function cartLines() {
   return Object.keys(cart).map(id => {
     const p = products.find(x => x.id === id);
     if (!p) return null;
-    const drink = DRINK_SECTIONS.includes(p.section);
-    return { id, name: p.name, price: Number(p.price), qty: cart[id], stock: p.stock,
-             drink, cold: coldPref[id] !== false };
+    return { id, name: p.name, price: Number(p.price), qty: cart[id], stock: p.stock, section: p.section,
+             drink: DRINK_SECTIONS.includes(p.section), cold: coldPref[id] !== false };
   }).filter(Boolean);
 }
-function cartTotal() { return cartLines().reduce((s, l) => s + l.qty * l.price, 0); }
+
+function canRedeem(lines) {
+  return !!currentUser && points >= REDEEM_POINTS && lines.some(l => l.section === 'Popcorn');
+}
+
+// Works out items, free popcorn, tip and the final total
+function calc() {
+  const lines = cartLines();
+  const sub = lines.reduce((s, l) => s + l.qty * l.price, 0);
+  let discount = 0, freeId = null;
+  if (useRedeem && canRedeem(lines)) {
+    const pops = lines.filter(l => l.section === 'Popcorn');
+    const cheapest = pops.reduce((a, b) => (a.price <= b.price ? a : b));
+    discount = cheapest.price;
+    freeId = cheapest.id;
+  }
+  const tip = lines.length ? TIP : 0;
+  return { lines, sub, discount, freeId, tip, total: sub - discount + tip };
+}
 
 function renderBar() {
-  const lines = cartLines();
-  const count = lines.reduce((s, l) => s + l.qty, 0);
+  const c = calc();
+  const count = c.lines.reduce((s, l) => s + l.qty, 0);
   $('bar').style.display = count > 0 ? 'flex' : 'none';
-  $('barText').textContent = `${count} item${count === 1 ? '' : 's'} · ₹${cartTotal()}`;
+  $('barText').textContent = `${count} item${count === 1 ? '' : 's'} · ₹${c.sub}`;
   const badge = $('cartBadge');
   badge.textContent = count;
   badge.style.display = count > 0 ? 'block' : 'none';
@@ -504,15 +652,37 @@ $('deliveryBox').addEventListener('change', (e) => { if (e.target.name === 'dlv'
 
 function renderCart() {
   const lines = cartLines();
+  if (!canRedeem(lines)) useRedeem = false;
+  const c = calc();
+
   $('cartLines').innerHTML = lines.map(l =>
     `<div class="line"><div><div>${esc(l.name)} × ${l.qty}</div>` +
     (l.drink ? `<label class="coldtick"><input type="checkbox" data-cold="${esc(l.id)}"${l.cold ? ' checked' : ''}> Cold (untick for not cold)</label>` : '') +
     `</div><span>₹${l.qty * l.price}</span></div>`).join('')
     || '<p class="empty">Your cart is empty.</p>';
-  $('cartTotal').textContent = 'Total: ₹' + cartTotal();
+
+  $('redeemBox').innerHTML = canRedeem(lines)
+    ? `<label class="opt"><input type="checkbox" id="useRedeem"${useRedeem ? ' checked' : ''}><span>Use ${REDEEM_POINTS} Shafaz Points for 1 free popcorn</span></label>` : '';
+
+  $('cartSum').innerHTML = lines.length ? `
+    <div class="srow"><span>Items</span><span>₹${c.sub}</span></div>
+    ${c.discount ? `<div class="srow free"><span>Free popcorn (${REDEEM_POINTS} points)</span><span>−₹${c.discount}</span></div>` : ''}
+    <div class="srow"><span>Delivery boy tip</span><span>₹${c.tip}</span></div>
+    <div class="total">Total: ₹${c.total}</div>
+    ${c.sub < MIN_ORDER ? `<div class="dnote">Minimum order amount is ₹${MIN_ORDER}. Add ₹${MIN_ORDER - c.sub} more to continue.</div>` : ''}` : '';
+
+  const qtyTotal = lines.reduce((s, l) => s + l.qty, 0);
+  const earn = Math.min(MAX_EARN, Math.max(0, qtyTotal - (c.freeId ? 1 : 0)));
+  $('cartPts').innerHTML = !lines.length ? '' : (currentUser
+    ? `<div class="cartpts">⭐ You will earn <b>${earn}</b> Shafaz Points with this order.</div>`
+    : `<div class="cartpts">⭐ Sign in with Google to earn <b>${earn}</b> Shafaz Points with this order.<br><button class="gbtn" data-signin="1">Sign in with Google</button></div>`);
+
   renderDelivery();
   updatePayLinks();
 }
+$('redeemBox').addEventListener('change', (e) => {
+  if (e.target.id === 'useRedeem') { useRedeem = e.target.checked; renderCart(); }
+});
 $('cartLines').addEventListener('change', (e) => {
   const id = e.target.dataset && e.target.dataset.cold;
   if (id) coldPref[id] = e.target.checked;
@@ -522,7 +692,7 @@ function updatePayLinks() {
   const seat = $('seat').value.trim();
   const note = seat ? 'Seat ' + seat : 'Shafaz Canteen order';
   const link = `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(PAYEE)}` +
-               `&am=${cartTotal()}&cu=INR&tn=${encodeURIComponent(note)}`;
+               `&am=${calc().total}&cu=INR&tn=${encodeURIComponent(note)}`;
   $('upiLink').href = link;
   $('qrLink').href = link;
 }
@@ -534,9 +704,16 @@ $('cartIcon').addEventListener('click', openCart);
 $('closeCart').addEventListener('click', () => { $('cartPanel').style.display = 'none'; });
 $('seat').addEventListener('input', updatePayLinks);
 
+// Trying to pay below the minimum order shows a message and stops the payment
 ['upiLink', 'qrLink'].forEach(id => {
   $(id).addEventListener('click', (e) => {
-    if (cartTotal() === 0) { e.preventDefault(); $('msg').textContent = 'Add items to your cart first.'; }
+    const c = calc();
+    if (c.sub === 0) { e.preventDefault(); $('msg').textContent = 'Add items to your cart first.'; return; }
+    if (c.sub < MIN_ORDER) {
+      e.preventDefault();
+      $('msg').textContent = 'Minimum order amount is ₹' + MIN_ORDER;
+      alert('Minimum order amount is ₹' + MIN_ORDER);
+    }
   });
 });
 
@@ -587,8 +764,9 @@ $('send').addEventListener('click', async () => {
   const showErr = t => { msg.textContent = t; };
   const name = $('cname').value.trim();
   const seat = $('seat').value.trim();
-  const lines = cartLines();
-  if (lines.length === 0) return showErr('Your cart is empty.');
+  const c = calc();
+  if (c.lines.length === 0) return showErr('Your cart is empty.');
+  if (c.sub < MIN_ORDER) return showErr('Minimum order amount is ₹' + MIN_ORDER);
   if (!name) return showErr('Please type your name.');
   if (!seat) return showErr('Please type your seat number.');
   const shot = $('payShot').files[0];
@@ -597,37 +775,63 @@ $('send').addEventListener('click', async () => {
   btn.disabled = true; btn.textContent = 'Sending...';
   try {
     const paymentPhoto = await compressImage(shot);
-    const total = cartTotal();
-    const items = lines.map(l => ({ id: l.id, name: l.name, price: l.price, qty: l.qty,
-                                    ...(l.drink ? { cold: l.cold } : {}) }));
+    const user = currentUser;
+    const redeem = !!c.freeId;
+    const qtyTotal = c.lines.reduce((s, l) => s + l.qty, 0);
+    const earned = user ? Math.min(MAX_EARN, Math.max(0, qtyTotal - (redeem ? 1 : 0))) : 0;
+    const items = c.lines.map(l => ({
+      id: l.id, name: l.name, price: l.price, qty: l.qty,
+      ...(l.drink ? { cold: l.cold } : {}),
+      ...(l.id === c.freeId ? { freeQty: 1 } : {})
+    }));
     const movie = selMovie ? movieLabel(selMovie) : '';
     const dlv = delivery;
     const stBefore = deliveryState();
     const counterRef = doc(db, 'counters', 'orders');
     const orderRef = doc(collection(db, 'orders'));
+    const custRef = user ? doc(db, 'customers', user.uid) : null;
     let pickupNo = '';
+    let finalPoints = 0;
 
+    // Stock, pickup number, points and the order are saved together, or not at all
     await runTransaction(db, async (tx) => {
-      const refs = lines.map(l => doc(db, 'products', l.id));
+      const refs = c.lines.map(l => doc(db, 'products', l.id));
       const snaps = await Promise.all(refs.map(r => tx.get(r)));
       const cs = await tx.get(counterRef);
+      const ps = custRef ? await tx.get(custRef) : null;
       snaps.forEach((s, i) => {
         const have = s.exists() ? s.data().stock : 0;
-        if (have < lines[i].qty) throw new Error(`Only ${have} of ${lines[i].name} left.`);
+        if (have < c.lines[i].qty) throw new Error(`Only ${have} of ${c.lines[i].name} left.`);
       });
+      let cur = 0;
+      if (custRef) {
+        cur = ps.exists() ? Number(ps.data().points) || 0 : 0;
+        if (redeem && cur < REDEEM_POINTS) throw new Error('Not enough Shafaz Points.');
+        finalPoints = cur - (redeem ? REDEEM_POINTS : 0) + earned;
+      }
       const n = cs.exists() ? cs.data().n + 1 : 1001;
       pickupNo = 'SGC-' + n;
       snaps.forEach((s, i) => tx.update(refs[i], {
-        stock: s.data().stock - lines[i].qty,
-        sold: (Number(s.data().sold) || 0) + lines[i].qty
+        stock: s.data().stock - c.lines[i].qty,
+        sold: (Number(s.data().sold) || 0) + c.lines[i].qty
       }));
       if (cs.exists()) tx.update(counterRef, { n }); else tx.set(counterRef, { n });
-      tx.set(orderRef, { seat, name, items, total, paymentPhoto, status: 'Pending', time: serverTimestamp(),
-                         pickupNo, delivery: dlv, movie });
+      if (custRef) {
+        const prof = { name: (user.displayName || '').slice(0, 60), email: (user.email || '').slice(0, 100), points: finalPoints };
+        if (ps.exists()) tx.update(custRef, prof); else tx.set(custRef, prof);
+      }
+      tx.set(orderRef, {
+        seat, name, items, total: c.total, paymentPhoto, status: 'Pending', time: serverTimestamp(),
+        pickupNo, delivery: dlv, movie,
+        tip: c.tip, discount: c.discount,
+        uid: user ? user.uid : '', email: user ? (user.email || '') : '',
+        pointsUsed: redeem ? REDEEM_POINTS : 0, pointsEarned: earned
+      });
     });
 
     Object.keys(cart).forEach(k => delete cart[k]);
     Object.keys(coldPref).forEach(k => delete coldPref[k]);
+    useRedeem = false;
     $('cartPanel').style.display = 'none';
     $('bar').style.display = 'none';
     $('pickupNo').textContent = pickupNo;
@@ -650,16 +854,24 @@ $('send').addEventListener('click', async () => {
       text = 'Your order is being prepared. Please keep your pickup number ready.';
     }
     $('deliveryMsg').textContent = text;
+    if (user) {
+      $('pointsMsg').style.display = 'block';
+      $('pointsMsg').textContent = '⭐ You earned ' + earned + ' Shafaz Points. You now have ' + finalPoints + ' points.' +
+        (redeem ? ' Your free popcorn was applied.' : '');
+    } else {
+      $('pointsMsg').style.display = 'none';
+    }
     $('timerView').style.display = 'block';
     if (dlv !== 'Interval seat delivery') startTimer();
   } catch (err) {
-    showErr(err.message && (err.message.startsWith('Only') || err.message.startsWith('Screenshot'))
-      ? err.message : 'Could not send. Please try again.');
+    const m = err && err.message ? err.message : '';
+    showErr(/^(Only|Screenshot|Not enough)/.test(m) ? m : 'Could not send. Please try again.');
     btn.disabled = false; btn.textContent = 'Send Request →';
   }
 });
 
 renderCategories();
+renderPoints();
 </script>
 </body>
 </html>
