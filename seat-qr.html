@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shafaz seat QR codes</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; margin: 0; padding: 14px; background: #fff; color: #222; }
+  .ctl { background: #f4f0ea; border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+  .ctl h2 { margin: 0 0 10px; }
+  .ctl label { display: inline-block; margin: 6px 12px 6px 0; font-size: 14px; }
+  .ctl input { width: 64px; padding: 8px; font-size: 16px; }
+  .ctl button { padding: 10px 16px; font-size: 15px; margin: 6px 6px 0 0; border: 0; border-radius: 10px; background: #B0173A; color: #fff; font-weight: bold; }
+  #out { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .tag { border: 1px dashed #999; border-radius: 10px; padding: 10px; text-align: center; break-inside: avoid; page-break-inside: avoid; }
+  .tag .qr { display: flex; justify-content: center; }
+  .tag b { display: block; margin-top: 6px; font-size: 15px; }
+  .tag small { color: #666; }
+  @media print { .ctl { display: none; } body { padding: 0; } }
+</style>
+</head>
+<body>
+<div class="ctl">
+  <h2>Seat QR codes</h2>
+  <label>Screen <input id="screen" value="1" maxlength="3"></label>
+  <label>First row <input id="r1" value="A" maxlength="1"></label>
+  <label>Last row <input id="r2" value="J" maxlength="1"></label>
+  <label>Seats per row <input id="n" type="number" value="12" min="1" max="40"></label><br>
+  <button id="go">Make QR codes</button>
+  <button id="prt">Print</button>
+  <div style="font-size:13px;color:#555;margin-top:8px;">Open this page from the website address (not from a downloaded file), so the QR links point to your site.</div>
+</div>
+<div id="out"></div>
+
+<script>
+var base = location.href.split('seat-qr.html')[0].split('?')[0];
+document.getElementById('go').onclick = function () {
+  var screen = document.getElementById('screen').value.trim() || '1';
+  var r1 = (document.getElementById('r1').value || 'A').toUpperCase().charCodeAt(0);
+  var r2 = (document.getElementById('r2').value || 'A').toUpperCase().charCodeAt(0);
+  var n = Math.min(40, Math.max(1, parseInt(document.getElementById('n').value, 10) || 1));
+  if (r2 < r1) { var t = r1; r1 = r2; r2 = t; }
+  var out = document.getElementById('out');
+  out.innerHTML = '';
+  for (var c = r1; c <= r2 && c < r1 + 26; c++) {
+    var row = String.fromCharCode(c);
+    for (var s = 1; s <= n; s++) {
+      var url = base + '?screen=' + encodeURIComponent(screen) + '&row=' + row + '&seat=' + s;
+      var tag = document.createElement('div');
+      tag.className = 'tag';
+      var q = document.createElement('div');
+      q.className = 'qr';
+      tag.appendChild(q);
+      tag.insertAdjacentHTML('beforeend', '<b>Screen ' + screen + ' · ' + row + s + '</b><small>Scan to order</small>');
+      out.appendChild(tag);
+      new QRCode(q, { text: url, width: 120, height: 120 });
+    }
+  }
+};
+document.getElementById('prt').onclick = function () { window.print(); };
+</script>
+</body>
+</html>
