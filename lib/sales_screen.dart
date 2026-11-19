@@ -61,14 +61,20 @@ class _SalesState extends State<SalesScreen> {
           }
           if (!snap.hasData) return const Center(child: CircularProgressIndicator());
 
-          double total = 0;
+          double sales = 0;
+          double tips = 0;
           int delivered = 0;
           int pending = 0;
+          int freePopcorn = 0;
           final qty = <String, int>{};
           final money = <String, double>{};
           for (final doc in snap.data!.docs) {
             final d = doc.data() as Map<String, dynamic>;
-            total += (d['total'] as num?)?.toDouble() ?? 0;
+            final total = (d['total'] as num?)?.toDouble() ?? 0;
+            final tip = (d['tip'] as num?)?.toDouble() ?? 0;
+            sales += total - tip;
+            tips += tip;
+            if ((d['pointsUsed'] as num?) != null && (d['pointsUsed'] as num) > 0) freePopcorn++;
             if (d['status'] == 'Delivered') {
               delivered++;
             } else {
@@ -99,7 +105,11 @@ class _SalesState extends State<SalesScreen> {
               ),
               Row(children: [
                 _stat('Orders', '${snap.data!.docs.length}', gold),
-                _stat('Sales', '₹${total.round()}', Colors.greenAccent),
+                _stat('Sales', '₹${sales.round()}', Colors.greenAccent),
+              ]),
+              Row(children: [
+                _stat('Delivery tips', '₹${tips.round()}', Colors.pinkAccent),
+                _stat('Free popcorn', '$freePopcorn', Colors.amberAccent),
               ]),
               Row(children: [
                 _stat('Delivered', '$delivered', Colors.lightBlueAccent),
