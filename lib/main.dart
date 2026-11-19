@@ -3,7 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'app_alarm.dart';
+import 'foreground_service.dart';
+import 'movies_screen.dart';
 import 'orders_screen.dart';
 import 'products_screen.dart';
 
@@ -19,6 +22,8 @@ final GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  FlutterForegroundTask.initCommunicationPort();
+  KeepAlive.init();
   String? startError;
   try {
     await Firebase.initializeApp();
@@ -104,8 +109,6 @@ class AuthGate extends StatelessWidget {
     );
   }
 }
-
-// ---------- Sign-in ----------
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -195,8 +198,6 @@ class _SignInState extends State<SignInScreen> {
   }
 }
 
-// ---------- Home ----------
-
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
   @override
@@ -211,6 +212,8 @@ class _HomeState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    // Keeps the app alive in the background so new-order alarms still ring
+    AppAlarm.setup().then((_) => KeepAlive.start());
     _sub = FirebaseFirestore.instance
         .collection('orders')
         .where('status', isEqualTo: 'Pending')
@@ -235,16 +238,18 @@ class _HomeState extends State<HomeScreen> {
     super.dispose();
   }
 
-  // Rings the alarm with the seat number and shows a notice
   Future<void> _alertNewOrder(Map<String, dynamic> d, int count) async {
     final seat = (d['seat'] ?? '?').toString();
+    final pickup = (d['pickupNo'] ?? '').toString();
+    final who = (d['name'] ?? '').toString();
+    final how = (d['delivery'] ?? '').toString();
     final items = (d['items'] as List?)?.length ?? 0;
     final total = d['total'] ?? 0;
     await AppAlarm.schedule(
       key: 'order-${DateTime.now().millisecondsSinceEpoch}',
-      when: DateTime.now().add(const Duration(seconds: 3)),
-      title: 'New order: Seat $seat',
-      body: '$items item(s) · ₹$total · Pending now: $count',
+      when: DateTime.now().add(const Duration(seconds: 2)),
+      title: 'New order $pickup · Seat $seat',
+      body: '$who · $items item(s) · ₹$total · $how · Pending: $count',
     );
     final ctx = navKey.currentContext;
     if (ctx != null) {
@@ -275,7 +280,10 @@ class _HomeState extends State<HomeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => FirebaseAuth.instance.signOut(),
+            onPressed: () async {
+              await KeepAlive.stop();
+              await FirebaseAuth.instance.signOut();
+            },
           ),
         ],
       ),
@@ -296,18 +304,12 @@ class _HomeState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          _menuTile(
-            'New orders',
-            'Seat number, items, photos and payment screenshot',
-            Icons.receipt_long,
-            () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OrdersScreen())),
-          ),
-          _menuTile(
-            'Manage products',
-            'Add items, photos, prices and stock',
-            Icons.inventory_2,
-            () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProductsScreen())),
-          ),
+          _menuTile('New orders', 'Pickup number, seat, items, photos and payment screenshot',
+              Icons.receipt_long, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const OrdersScreen()))),
+          _menuTile('Manage products', 'Add items, photos, prices and stock',
+              Icons.inventory_2, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProductsScreen()))),
+          _menuTile('Movies & interval', 'Movie names, start times and interval minutes',
+              Icons.movie, () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MoviesScreen()))),
           const SizedBox(height: 24),
           Center(
             child: Image.asset(
