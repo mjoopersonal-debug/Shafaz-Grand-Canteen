@@ -92,6 +92,7 @@ class _OrderCard extends StatelessWidget {
 
   Widget _itemRow(Map<String, dynamic> it) {
     final photo = photos[it['id']];
+    final cold = it['cold'];
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -109,8 +110,22 @@ class _OrderCard extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(it['name'].toString(),
-                style: const TextStyle(color: textCol, fontSize: 16, fontWeight: FontWeight.w600)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(it['name'].toString(),
+                    style: const TextStyle(color: textCol, fontSize: 16, fontWeight: FontWeight.w600)),
+                if (cold is bool)
+                  Text(
+                    cold ? 'COLD' : 'NOT COLD',
+                    style: TextStyle(
+                      color: cold ? Colors.lightBlueAccent : Colors.orangeAccent,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+              ],
+            ),
           ),
           Text('x${it['qty']}', style: const TextStyle(color: gold, fontSize: 18, fontWeight: FontWeight.bold)),
         ],
