@@ -1,13 +1,15 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
 import 'package:image_picker/image_picker.dart';
 import 'main.dart' show gold, mutedCol, textCol, redAccent;
 import 'orders_screen.dart' show bytesFrom;
 
 // Must match the sections on the customer website exactly
-const sections = ['Cold Drinks', 'Hot Snacks', 'Lays (Chips)', 'Carbonated Drinks', 'Popcorn'];
+const sections = ['Cold Drinks', 'Hot Snacks', 'Lays (Chips)', 'Carbonated Drinks', 'Popcorn', 'Ice Creams'];
 
 String _sortKey(QueryDocumentSnapshot d) {
   final m = d.data() as Map<String, dynamic>;
@@ -85,21 +87,20 @@ class _ProductTile extends StatelessWidget {
         ],
       ),
     );
-    if (ok == true) {
-      final price = int.tryParse(priceC.text.trim());
-      final stock = int.tryParse(stockC.text.trim());
-      if (price == null || stock == null || stock < 0) {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Enter a valid price and stock.')),
-          );
-        }
-      } else {
-        await doc.reference.update({'price': price, 'stock': stock});
-      }
-    }
+    final price = int.tryParse(priceC.text.trim());
+    final stock = int.tryParse(stockC.text.trim());
     priceC.dispose();
     stockC.dispose();
+    if (ok != true) return;
+    if (price == null || stock == null || stock < 0) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Enter a valid price and stock.')),
+        );
+      }
+      return;
+    }
+    await doc.reference.update({'price': price, 'stock': stock});
   }
 
   Future<void> _delete(BuildContext context, String name) async {
@@ -144,7 +145,7 @@ class _ProductTile extends StatelessWidget {
                 height: 72,
                 color: Colors.white,
                 child: photo != null
-                    ? Image.memory(photo, fit: BoxFit.contain)
+                    ? Image.memory(photo, fit: BoxFit.cover)
                     : const Icon(Icons.image_not_supported, color: Colors.grey),
               ),
             ),
@@ -192,7 +193,7 @@ class _AddProductState extends State<AddProductScreen> {
   final _price = TextEditingController();
   final _stock = TextEditingController();
   String _section = sections.first;
-  String? _photo; // saved as text inside the product record
+  String? _photo;
   Uint8List? _preview;
   bool _busy = false;
   String? _error;
@@ -212,15 +213,31 @@ class _AddProductState extends State<AddProductScreen> {
     });
   }
 
+  // Crops the picked photo to a centred square, so there is no white space
   Future<void> _pickPhoto() async {
     final x = await ImagePicker().pickImage(
       source: ImageSource.gallery,
-      maxWidth: 700,
-      maxHeight: 700,
-      imageQuality: 60,
+      maxWidth: 1200,
+      maxHeight: 1200,
     );
     if (x == null) return;
-    final bytes = await x.readAsBytes();
+    final raw = await x.readAsBytes();
+    var decoded = img.decodeImage(raw);
+    if (decoded == null) {
+      _fail('Could not read this photo. Please pick another one.');
+      return;
+    }
+    decoded = img.bakeOrientation(decoded);
+    final side = min(decoded.width, decoded.height);
+    final square = img.copyCrop(
+      decoded,
+      x: (decoded.width - side) ~/ 2,
+      y: (decoded.height - side) ~/ 2,
+      width: side,
+      height: side,
+    );
+    final small = img.copyResize(square, width: 600);
+    final bytes = Uint8List.fromList(img.encodeJpg(small, quality: 70));
     final data = 'data:image/jpeg;base64,${base64Encode(bytes)}';
     if (data.length > 250000) {
       _fail('This photo is too large. Please pick a smaller one.');
@@ -262,6 +279,7 @@ class _AddProductState extends State<AddProductScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final boxSize = MediaQuery.of(context).size.width - 32;
     return Scaffold(
       appBar: AppBar(title: const Text('Add product')),
       body: ListView(
@@ -270,17 +288,18 @@ class _AddProductState extends State<AddProductScreen> {
           GestureDetector(
             onTap: _pickPhoto,
             child: Container(
-              height: 180,
+              height: boxSize,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(16),
               ),
               child: _preview == null
                   ? const Center(
-                      child: Text('Tap to choose product photo', style: TextStyle(color: Colors.black54)))
+                      child: Text('Tap to choose a photo (it is cropped square)',
+                          style: TextStyle(color: Colors.black54)))
                   : ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Image.memory(_preview!, fit: BoxFit.contain),
+                      child: Image.memory(_preview!, fit: BoxFit.cover),
                     ),
             ),
           ),
