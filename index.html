@@ -66,7 +66,6 @@
   .catcard .n { font-size:13px; font-weight:bold; margin-top:6px; min-height:32px; display:flex; align-items:center; justify-content:center; }
   .catcard .f { color:var(--gold); font-size:12px; }
 
-  /* Category panel opens in place */
   .catpanel { display:grid; grid-template-rows:0fr; transition:grid-template-rows .35s ease; margin:0 12px; }
   .catpanel.open { grid-template-rows:1fr; }
   .catpanel .inner { overflow:hidden; min-height:0; }
@@ -99,7 +98,9 @@
   .panel { display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:20; overflow-y:auto; }
   .sheet { background:var(--panel); border:1px solid rgba(245,185,66,.35); margin:24px auto; max-width:480px; border-radius:22px; padding:18px; }
   .sheet h3 { color:var(--gold); margin:0 0 10px; font-size:20px; }
-  .line { display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(245,185,66,.15); font-size:15px; }
+  .line { display:flex; justify-content:space-between; align-items:flex-start; padding:8px 0; border-bottom:1px solid rgba(245,185,66,.15); font-size:15px; }
+  .coldtick { display:flex; align-items:center; gap:6px; margin:4px 0 0; font-size:13px; font-weight:bold; color:#8fd3ff; }
+  .coldtick input { width:18px; height:18px; }
   .total { font-size:20px; font-weight:900; color:var(--gold); padding:12px 0; }
   label { display:block; font-weight:bold; margin-top:14px; font-size:14px; color:var(--gold2); }
   input[type=text] { width:100%; padding:12px; font-size:16px; border:1px solid var(--gold); border-radius:12px; background:#24100c; color:var(--text); margin-top:6px; }
@@ -130,6 +131,7 @@
   .ring .num b { font-size:46px; color:var(--text); font-variant-numeric:tabular-nums; }
   .ring .num span { color:var(--muted); font-size:14px; }
   .note { background:var(--panel); border:1px solid rgba(245,185,66,.35); border-radius:16px; padding:14px; font-size:15px; line-height:1.5; color:var(--text); margin-top:10px; }
+  .doornote { display:none; background:#2a1a06; border:2px solid var(--gold); border-radius:16px; padding:14px; font-size:18px; font-weight:bold; color:var(--gold2); margin-top:4px; }
   .call { display:none; margin-top:16px; background:#2a0f0a; border:1px solid var(--red); border-radius:16px; padding:14px; font-size:16px; line-height:1.5; }
   .call a { color:var(--gold); font-weight:bold; font-size:18px; }
 </style>
@@ -229,6 +231,7 @@
       </svg>
       <div class="num"><b id="timer">10:00</b><span>Remaining</span></div>
     </div>
+    <div class="doornote" id="doorNote">Come to the door when the delivery boy arrives</div>
     <div class="call" id="callBox">
       Your order is taking longer than expected.<br>
       Please call us: <a href="tel:9744123717">9744123717</a>
@@ -244,6 +247,7 @@ import { firebaseConfig } from "./firebase-config.js";
 
 const db = getFirestore(initializeApp(firebaseConfig));
 const SECTIONS = ['Cold Drinks', 'Hot Snacks', 'Lays (Chips)', 'Carbonated Drinks', 'Popcorn', 'Ice Creams'];
+const DRINK_SECTIONS = ['Cold Drinks', 'Carbonated Drinks'];
 const CAT_IMAGES = {
   'Cold Drinks': 'cat-cold-drinks.png',
   'Hot Snacks': 'cat-snacks.png',
@@ -252,6 +256,7 @@ const CAT_IMAGES = {
   'Popcorn': 'cat-popcorn.png',
   'Ice Creams': 'cat-icecream.png'
 };
+const HALL = 'Hall entrance delivery';
 const MAX_PHOTO_CHARS = 300000;
 const TOTAL_SECONDS = 600;
 const RING_LEN = 565.5;
@@ -264,9 +269,9 @@ let selMovie = null;
 let delivery = '';
 let openCat = null;
 const cart = {};
+const coldPref = {}; // productId -> false when the customer unticks Cold
 
 const $ = id => document.getElementById(id);
-function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-'); }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
 function fmt12(d) { return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); }
 
@@ -368,7 +373,6 @@ function cardHtml(p) {
   </div>`;
 }
 
-// The category (or search result) opens in place under the category row
 function renderPanel(scroll) {
   const q = $('q').value.trim().toLowerCase();
   const only = $('inStock').checked;
@@ -419,7 +423,10 @@ $('catPanel').addEventListener('click', (e) => {
 function cartLines() {
   return Object.keys(cart).map(id => {
     const p = products.find(x => x.id === id);
-    return p ? { id, name: p.name, price: Number(p.price), qty: cart[id], stock: p.stock } : null;
+    if (!p) return null;
+    const drink = DRINK_SECTIONS.includes(p.section);
+    return { id, name: p.name, price: Number(p.price), qty: cart[id], stock: p.stock,
+             drink, cold: coldPref[id] !== false };
   }).filter(Boolean);
 }
 function cartTotal() { return cartLines().reduce((s, l) => s + l.qty * l.price, 0); }
@@ -439,13 +446,13 @@ function renderDelivery() {
   let opts, note = '';
   if (st.mode === 'interval') {
     opts = [['Interval seat delivery', 'Deliver to my seat at the interval (' + fmt12(st.i) + ')'],
-            ['Counter pickup', 'I will collect at the counter']];
+            [HALL, 'Come to the hall entrance for delivery']];
     note = 'Please order for interval delivery so other viewers are not disturbed.';
   } else if (st.mode === 'door') {
     opts = [['Door pickup', 'I will collect at the theatre door']];
     note = 'The interval has already passed. Please collect your order at the theatre door.';
   } else {
-    opts = [['Counter pickup', 'Pickup at the counter'], ['Seat delivery', 'Deliver to my seat']];
+    opts = [[HALL, 'Come to the hall entrance for delivery'], ['Seat delivery', 'Deliver to my seat']];
   }
   if (!opts.some(o => o[0] === delivery)) delivery = opts[0][0];
   $('deliveryBox').innerHTML = opts.map(o =>
@@ -457,12 +464,18 @@ $('deliveryBox').addEventListener('change', (e) => { if (e.target.name === 'dlv'
 function renderCart() {
   const lines = cartLines();
   $('cartLines').innerHTML = lines.map(l =>
-    `<div class="line"><span>${esc(l.name)} × ${l.qty}</span><span>₹${l.qty * l.price}</span></div>`).join('')
+    `<div class="line"><div><div>${esc(l.name)} × ${l.qty}</div>` +
+    (l.drink ? `<label class="coldtick"><input type="checkbox" data-cold="${esc(l.id)}"${l.cold ? ' checked' : ''}> Cold (untick for not cold)</label>` : '') +
+    `</div><span>₹${l.qty * l.price}</span></div>`).join('')
     || '<p class="empty">Your cart is empty.</p>';
   $('cartTotal').textContent = 'Total: ₹' + cartTotal();
   renderDelivery();
   updatePayLinks();
 }
+$('cartLines').addEventListener('change', (e) => {
+  const id = e.target.dataset && e.target.dataset.cold;
+  if (id) coldPref[id] = e.target.checked;
+});
 
 function updatePayLinks() {
   const seat = $('seat').value.trim();
@@ -544,7 +557,8 @@ $('send').addEventListener('click', async () => {
   try {
     const paymentPhoto = await compressImage(shot);
     const total = cartTotal();
-    const items = lines.map(l => ({ id: l.id, name: l.name, price: l.price, qty: l.qty }));
+    const items = lines.map(l => ({ id: l.id, name: l.name, price: l.price, qty: l.qty,
+                                    ...(l.drink ? { cold: l.cold } : {}) }));
     const movie = selMovie ? movieLabel(selMovie) : '';
     const dlv = delivery;
     const stBefore = deliveryState();
@@ -552,7 +566,6 @@ $('send').addEventListener('click', async () => {
     const orderRef = doc(collection(db, 'orders'));
     let pickupNo = '';
 
-    // Stock, pickup number and order are saved together, or not at all
     await runTransaction(db, async (tx) => {
       const refs = lines.map(l => doc(db, 'products', l.id));
       const snaps = await Promise.all(refs.map(r => tx.get(r)));
@@ -570,11 +583,15 @@ $('send').addEventListener('click', async () => {
     });
 
     Object.keys(cart).forEach(k => delete cart[k]);
+    Object.keys(coldPref).forEach(k => delete coldPref[k]);
     $('cartPanel').style.display = 'none';
     $('bar').style.display = 'none';
     $('pickupNo').textContent = pickupNo;
     $('seatShow').textContent = seat;
+
     let text = '';
+    $('timerBlock').style.display = 'block';
+    $('doorNote').style.display = 'none';
     if (dlv === 'Interval seat delivery') {
       text = 'Your order will be delivered to your seat at the interval (' + fmt12(stBefore.i) + '). Please keep your pickup number ready.';
       $('timerBlock').style.display = 'none';
@@ -582,8 +599,11 @@ $('send').addEventListener('click', async () => {
       text = 'Please collect your order at the theatre door and show your pickup number.';
     } else if (dlv === 'Seat delivery') {
       text = 'Your order will be brought to your seat. Please keep your pickup number ready.';
+    } else if (dlv === HALL) {
+      text = 'Please come to the hall entrance. Our delivery boy will bring your order there. Show your pickup number.';
+      $('doorNote').style.display = 'block';
     } else {
-      text = 'Please collect your order at the counter and show your pickup number.';
+      text = 'Your order is being prepared. Please keep your pickup number ready.';
     }
     $('deliveryMsg').textContent = text;
     $('timerView').style.display = 'block';
