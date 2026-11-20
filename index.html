@@ -108,15 +108,12 @@
   .cats { display:flex; gap:12px; overflow-x:auto; padding:14px 16px 20px; scrollbar-width:none; }
   .cats::-webkit-scrollbar { display:none; }
 
-  /* Category tiles: golden border + yellow_bg.png surface by default */
+  /* Category tiles: plain brown surface — the golden glow now lives with the product */
   .catcard {
     position:relative;
     flex:0 0 auto;
     width:112px;
-    background:
-      linear-gradient(180deg, rgba(20,9,8,.42) 0%, rgba(20,9,8,.60) 100%),
-      url('yellow_bg.png') center 32% / cover no-repeat,
-      var(--panel);
+    background:linear-gradient(180deg, #2c1409 0%, #1b0a08 100%);
     border:2px solid var(--line);
     border-radius:16px;
     text-align:center;
@@ -131,22 +128,6 @@
       0 6px 18px rgba(0,0,0,.45),
       inset 0 0 18px rgba(245,185,66,.10);
     transition:box-shadow .28s ease, border-color .28s ease, transform .28s ease;
-  }
-
-  /* Popcorn gets the special spotlight image */
-  .catcard[data-cat="Popcorn"] {
-    background:
-      linear-gradient(180deg, rgba(20,9,8,.30) 0%, rgba(20,9,8,.50) 100%),
-      url('yellow_glow.png') center 28% / cover no-repeat,
-      var(--panel);
-  }
-
-  /* Hot Snacks keeps a plain dark surface — no golden overlay here */
-  .catcard[data-cat="Hot Snacks"] {
-    background:
-      radial-gradient(120% 90% at 50% 0%, rgba(245,185,66,.20) 0%, rgba(245,185,66,.07) 45%, rgba(245,185,66,0) 72%),
-      radial-gradient(90% 70% at 50% 100%, rgba(224,53,43,.16) 0%, rgba(224,53,43,0) 70%),
-      var(--panel);
   }
 
   .catcard:hover,
@@ -172,13 +153,58 @@
       inset 0 0 28px rgba(245,185,66,.26);
   }
 
-  .catcard img {
+  /* The product sits straight on the card: no inner brown box, glow hugs the cutout */
+  .catcard .thumb {
+    position:relative;
+    isolation:isolate;
+    display:block;
     width:100%;
     aspect-ratio:1/1;
+    /* tiny sparkles, painted behind the product */
+    background-image:
+      radial-gradient(circle at 15% 26%, rgba(255,242,205,.95) 0 1px, rgba(255,200,90,0) 2.2px),
+      radial-gradient(circle at 85% 20%, rgba(255,242,205,.90) 0 1.2px, rgba(255,200,90,0) 2.4px),
+      radial-gradient(circle at 27% 66%, rgba(255,232,175,.85) 0 1px, rgba(255,200,90,0) 2px),
+      radial-gradient(circle at 74% 60%, rgba(255,232,175,.85) 0 1.2px, rgba(255,200,90,0) 2.2px),
+      radial-gradient(circle at 50% 12%, rgba(255,246,215,.90) 0 1px, rgba(255,200,90,0) 2px);
+  }
+  /* Warm halo sitting directly behind the product */
+  .catcard .thumb::before {
+    content:"";
+    position:absolute;
+    z-index:-1;
+    inset:-12% -8% 2%;
+    border-radius:50%;
+    background:
+      radial-gradient(60% 42% at 50% 88%, rgba(255,214,120,.72) 0%, rgba(255,170,40,.30) 45%, rgba(255,150,20,0) 78%),
+      radial-gradient(80% 68% at 50% 46%, rgba(255,180,55,.55) 0%, rgba(255,152,22,.18) 52%, rgba(255,150,20,0) 80%);
+    filter:blur(7px);
+    pointer-events:none;
+  }
+  /* Glowing elliptical light ring on the floor, like the reference */
+  .catcard .thumb::after {
+    content:"";
+    position:absolute;
+    left:7%; right:7%; bottom:12%;
+    height:12%;
+    border:1px solid rgba(255,214,125,.85);
+    border-radius:50%;
+    box-shadow:
+      0 0 7px rgba(255,190,60,.95),
+      0 0 16px rgba(255,165,35,.6),
+      inset 0 0 5px rgba(255,190,60,.3);
+    pointer-events:none;
+  }
+  .catcard .thumb img {
+    position:relative;
+    width:100%;
+    height:100%;
     object-fit:contain;
-    background:radial-gradient(circle at 50% 45%, #2e1508 0%, #24100c 70%);
-    border-radius:12px;
-    box-shadow:inset 0 0 14px rgba(245,185,66,.16);
+    /* halo tracing the product silhouette so the glow wraps it */
+    filter:
+      drop-shadow(0 0 5px rgba(255,214,130,.90))
+      drop-shadow(0 0 14px rgba(255,168,40,.65))
+      drop-shadow(0 10px 14px rgba(0,0,0,.45));
   }
 
   .catcard .n { font-size:13px; font-weight:bold; margin-top:6px; min-height:32px; display:flex; align-items:center; justify-content:center; }
@@ -645,7 +671,7 @@ function renderCategories() {
     const items = products.filter(p => p.section === sec);
     const minPrice = items.length ? Math.min(...items.map(p => Number(p.price) || 0)) : null;
     return `<button class="catcard${openCat === sec ? ' active' : ''}" data-cat="${esc(sec)}">
-      <img src="${CAT_IMAGES[sec]}" alt="" onerror="this.src='shafaz-logo.png'">
+      <span class="thumb"><img src="${CAT_IMAGES[sec]}" alt="" onerror="this.src='shafaz-logo.png'"></span>
       <div class="n">${esc(sec)}</div>
       <div class="f">${minPrice !== null ? 'From ₹' + minPrice : 'Coming soon'}</div>
     </button>`;
