@@ -16,7 +16,7 @@ class KeepAliveHandler extends TaskHandler {
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {}
 }
 
-class KeepAlive {
+class OrderKeepAlive {
   static void init() {
     FlutterForegroundTask.init(
       androidNotificationOptions: AndroidNotificationOptions(
