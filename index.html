@@ -25,7 +25,7 @@
 })();
 </script>
 <style>
-  :root { --bg:#0E0606; --panel:#1A0B0B; --gold:#F5B942; --gold2:#FFD76A; --red:#E0352B; --green:#3DDC84; --text:#FFF6E6; --muted:#BFA892; --banner-h:7cm; }
+  :root { --bg:#0E0606; --panel:#1A0B0B; --gold:#F5B942; --gold2:#FFD76A; --red:#E0352B; --green:#3DDC84; --text:#FFF6E6; --muted:#BFA892; }
   * { box-sizing:border-box; }
   body { margin:0; font-family:'Segoe UI',Arial,sans-serif; background:radial-gradient(circle at top, #3a1208 0%, var(--bg) 60%); color:var(--text); padding-bottom:90px; min-height:100vh; }
 
@@ -36,26 +36,23 @@
   .badge { position:absolute; top:-4px; right:-6px; background:var(--red); color:#fff; border-radius:50%; font-size:11px; min-width:18px; height:18px; line-height:18px; text-align:center; font-weight:bold; display:none; }
   .pill { background:var(--gold); color:#2a1606; border:0; border-radius:20px; padding:8px 12px; font-weight:bold; font-size:13px; text-decoration:none; }
 
-  /* Banner: slim rectangle with swipeable category photos */
-  .hero { position:relative; margin:12px; border-radius:24px; overflow:hidden; height:var(--banner-h); background:#1a0b0b; border:1px solid rgba(245,185,66,.4); }
+  /* Banner: swipeable category photos + dots */
+  .hero { position:relative; margin:12px; border-radius:20px; overflow:hidden; min-height:440px; background:#1a0b0b; border:1px solid rgba(245,185,66,.3); }
   .hero .slides { position:absolute; inset:0; z-index:0; display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
   .hero .slides::-webkit-scrollbar { display:none; }
   .hero .slide { position:relative; flex:0 0 100%; width:100%; scroll-snap-align:center; scroll-snap-stop:always; background:#1a0b0b url('theatre.png') center center/cover no-repeat; }
-  .hero .slide::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(14,6,6,.85) 0%, rgba(14,6,6,.45) 50%, rgba(14,6,6,0) 100%); }
-  .hero .slide img { position:absolute; right:0; bottom:0; height:100%; width:auto; max-width:50%; object-fit:contain; object-position:right bottom; }
-  .hero .txt { position:absolute; inset:0; z-index:2; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; padding:14px 16px; max-width:60%; text-shadow:0 2px 8px rgba(0,0,0,.7); pointer-events:none; }
+  .hero .slide::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(14,6,6,.82) 0%, rgba(14,6,6,.4) 50%, rgba(14,6,6,0) 100%); }
+  /* Picture sits in the bottom-right corner and is shown big */
+  .hero .slide img { position:absolute; right:0; bottom:0; height:50%; width:auto; max-width:52%; object-fit:contain; object-position:right bottom; }
+  .hero .txt { position:relative; z-index:2; padding:24px 18px 52px; max-width:46%; text-shadow:0 2px 8px rgba(0,0,0,.7); pointer-events:none; }
   .hero .txt .cta { pointer-events:auto; }
-  .hero h1 { margin:0; font-size:19px; line-height:1.2; color:var(--text); font-weight:700; }
-  .hero h1 span { color:var(--gold); display:block; font-size:25px; line-height:1.15; font-weight:900; }
-  .hero p { display:none; }
-  .hero .taglineWrap { display:contents; }
-  .hero .tagline { display:none; width:100%; max-width:290px; height:auto; margin:0 0 6px; filter:drop-shadow(0 3px 8px rgba(0,0,0,.6)); }
-  .hero .txt.hasTag .tagline { display:block; }
-  .hero .txt.hasTag h1 { display:none; }
-  .cta { display:inline-block; margin-top:8px; background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#2a1606; font-weight:bold; border:0; border-radius:10px; padding:6px 14px; font-size:15px; text-decoration:none; }
-  .dots { position:absolute; left:50%; transform:translateX(-50%); bottom:3px; z-index:3; display:flex; align-items:center; gap:5px; padding:2px 6px; border-radius:10px; background:rgba(14,6,6,.45); }
-  .dot { width:5px; height:5px; padding:0; border:0; border-radius:50%; background:rgba(255,246,230,.4); cursor:pointer; transition:width .25s, background .25s; }
-  .dot.on { width:14px; border-radius:3px; background:var(--gold); }
+  .hero h1 { margin:0; font-size:28px; line-height:1.15; color:var(--text); font-weight:700; }
+  .hero h1 span { color:var(--gold); display:block; font-size:34px; font-weight:900; }
+  .hero p { color:#f1e2cc; font-size:14px; margin:10px 0 16px; }
+  .cta { display:inline-block; background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#2a1606; font-weight:bold; border:0; border-radius:14px; padding:12px 20px; font-size:15px; text-decoration:none; }
+  .dots { position:absolute; left:16px; bottom:14px; z-index:3; display:flex; align-items:center; gap:8px; padding:5px 9px; border-radius:20px; background:rgba(14,6,6,.45); }
+  .dot { width:8px; height:8px; padding:0; border:0; border-radius:50%; background:rgba(255,246,230,.35); cursor:pointer; transition:width .25s, background .25s; }
+  .dot.on { width:22px; border-radius:5px; background:var(--gold); }
 
   .movbar { display:none; margin:0 12px 10px; background:#24100c; border:1px solid rgba(245,185,66,.4); border-radius:16px; padding:12px; font-size:14px; line-height:1.5; }
   .movbar b { color:var(--gold); }
@@ -187,11 +184,6 @@
 <section class="hero">
   <div class="slides" id="heroSlides" aria-label="Category highlights, swipe sideways"></div>
   <div class="txt">
-    <picture class="taglineWrap">
-      <source srcset="hero-tagline.webp" type="image/webp">
-      <img class="tagline" src="hero-tagline.png" alt="Enjoy the Movie... With Great Snacks!"
-           onload="this.closest('.txt').classList.add('hasTag')" onerror="this.remove()">
-    </picture>
     <h1>Enjoy the Movie...<span>With Great Snacks!</span></h1>
     <p>Order your favourite snacks easily at Shafaz Grand Canteen.</p>
     <a class="cta" href="#menu-top">Order Now &rarr;</a>
@@ -407,7 +399,6 @@ function signIn() {
     alert('Google sign-in did not work. Please open this page in Chrome or Safari and try again.');
   });
 }
-
 document.addEventListener('click', (e) => {
   if (e.target.closest('[data-signin]')) signIn();
   if (e.target.closest('[data-signout]')) signOut(auth);
@@ -493,6 +484,7 @@ $('movBar').addEventListener('click', (e) => { if (e.target.id === 'pickMovie') 
 setInterval(renderMovieBar, 30000);
 
 // ---------- Banner: swipeable category photos with dots ----------
+// Popcorn first, then one slide per category in the order they are swiped.
 const HERO_CATS = ['Popcorn', 'Ice Creams', 'Hot Snacks', 'Cold Drinks', 'Carbonated Drinks', 'Lays (Chips)']
   .filter(c => SECTIONS.includes(c));
 const HERO_SLIDES = HERO_CATS.map((cat, i) => ({ cat, img: i === 0 ? 'hero-v3.webp' : CAT_IMAGES[cat] }));
