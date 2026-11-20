@@ -42,8 +42,8 @@
   .hero .slides::-webkit-scrollbar { display:none; }
   .hero .slide { position:relative; flex:0 0 100%; width:100%; scroll-snap-align:center; scroll-snap-stop:always; background:#1a0b0b url('theatre.png') center center/cover no-repeat; }
   .hero .slide::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(14,6,6,.82) 0%, rgba(14,6,6,.4) 50%, rgba(14,6,6,0) 100%); }
-  .hero .slide img { position:absolute; right:2%; bottom:52px; width:46%; height:52%; object-fit:contain; object-position:right bottom; }
-  .hero .txt { position:relative; z-index:2; padding:24px 18px 52px; max-width:60%; text-shadow:0 2px 8px rgba(0,0,0,.7); pointer-events:none; }
+  .hero .slide img { position:absolute; right:0; bottom:56px; height:36%; width:auto; max-width:54%; object-fit:contain; object-position:right bottom; }
+  .hero .txt { position:relative; z-index:2; padding:24px 18px 52px; max-width:46%; text-shadow:0 2px 8px rgba(0,0,0,.7); pointer-events:none; }
   .hero .txt .cta { pointer-events:auto; }
   .hero h1 { margin:0; font-size:28px; line-height:1.15; color:var(--text); font-weight:700; }
   .hero h1 span { color:var(--gold); display:block; font-size:34px; font-weight:900; }
@@ -80,7 +80,7 @@
   .cats::-webkit-scrollbar { display:none; }
   .catcard { flex:0 0 auto; width:112px; background:var(--panel); border:1px solid rgba(245,185,66,.35); border-radius:16px; text-align:center; padding:8px 6px 10px; color:var(--text); font-family:inherit; cursor:pointer; }
   .catcard.active { border-color:var(--gold); box-shadow:0 0 0 2px rgba(245,185,66,.5); }
-  .catcard img { width:100%; aspect-ratio:1/1; object-fit:cover; background:#24100c; border-radius:12px; }
+  .catcard img { width:100%; aspect-ratio:1/1; object-fit:contain; background:#24100c; border-radius:12px; }
   .catcard .n { font-size:13px; font-weight:bold; margin-top:6px; min-height:32px; display:flex; align-items:center; justify-content:center; }
   .catcard .f { color:var(--gold); font-size:12px; }
 
@@ -320,12 +320,12 @@ const auth = getAuth(app);
 const SECTIONS = ['Cold Drinks', 'Hot Snacks', 'Lays (Chips)', 'Carbonated Drinks', 'Popcorn', 'Ice Creams'];
 const DRINK_SECTIONS = ['Cold Drinks', 'Carbonated Drinks'];
 const CAT_IMAGES = {
-  'Cold Drinks': 'cat-cold-drinks-v2.webp',
-  'Hot Snacks': 'cat-snacks-v2.webp',
-  'Lays (Chips)': 'cat-lays-v2.webp',
-  'Carbonated Drinks': 'cat-carbonated-v2.webp',
-  'Popcorn': 'cat-popcorn-v2.webp',
-  'Ice Creams': 'cat-icecream-v2.webp'
+  'Cold Drinks': 'cat-cold-drinks-v3.webp',
+  'Hot Snacks': 'cat-snacks-v3.webp',
+  'Lays (Chips)': 'cat-lays-v3.webp',
+  'Carbonated Drinks': 'cat-carbonated-v3.webp',
+  'Popcorn': 'cat-popcorn-v3.webp',
+  'Ice Creams': 'cat-icecream-v3.webp'
 };
 const HALL = 'Hall entrance delivery';
 const TIP = 10;            // delivery boy tip, added to every order
@@ -486,7 +486,7 @@ setInterval(renderMovieBar, 30000);
 // Popcorn first, then one slide per category in the order they are swiped.
 const HERO_CATS = ['Popcorn', 'Ice Creams', 'Hot Snacks', 'Cold Drinks', 'Carbonated Drinks', 'Lays (Chips)']
   .filter(c => SECTIONS.includes(c));
-const HERO_SLIDES = HERO_CATS.map((cat, i) => ({ cat, img: i === 0 ? 'hero-v2.webp' : CAT_IMAGES[cat] }));
+const HERO_SLIDES = HERO_CATS.map((cat, i) => ({ cat, img: i === 0 ? 'hero-v3.webp' : CAT_IMAGES[cat] }));
 
 $('heroSlides').innerHTML = HERO_SLIDES.map(s =>
   `<div class="slide"><img src="${s.img}" alt="${esc(s.cat)}" onerror="this.src='shafaz-logo.png'"></div>`).join('');
