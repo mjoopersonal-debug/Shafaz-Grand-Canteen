@@ -36,19 +36,22 @@
   .badge { position:absolute; top:-4px; right:-6px; background:var(--red); color:#fff; border-radius:50%; font-size:11px; min-width:18px; height:18px; line-height:18px; text-align:center; font-weight:bold; display:none; }
   .pill { background:var(--gold); color:#2a1606; border:0; border-radius:20px; padding:8px 12px; font-weight:bold; font-size:13px; text-decoration:none; }
 
-  /* Banner with scrolling category tabs */
-  .hero { position:relative; margin:12px; border-radius:20px; overflow:hidden; min-height:380px; background:#1a0b0b url('theatre.png') center center/cover no-repeat; border:1px solid rgba(245,185,66,.3); }
-  .hero::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(14,6,6,.8) 0%, rgba(14,6,6,.35) 50%, rgba(14,6,6,0) 100%); }
-  .hero img.pic { position:absolute; right:0; bottom:112px; height:55%; max-width:45%; object-fit:contain; z-index:1; }
-  .hero .txt { position:relative; z-index:2; padding:24px 18px; max-width:60%; text-shadow:0 2px 8px rgba(0,0,0,.7); }
+  /* Banner: swipeable category photos + dots */
+  .hero { position:relative; margin:12px; border-radius:20px; overflow:hidden; min-height:400px; background:#1a0b0b; border:1px solid rgba(245,185,66,.3); }
+  .hero .slides { position:absolute; inset:0; z-index:0; display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+  .hero .slides::-webkit-scrollbar { display:none; }
+  .hero .slide { position:relative; flex:0 0 100%; width:100%; scroll-snap-align:center; scroll-snap-stop:always; background:#1a0b0b url('theatre.png') center center/cover no-repeat; }
+  .hero .slide::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(14,6,6,.82) 0%, rgba(14,6,6,.4) 50%, rgba(14,6,6,0) 100%); }
+  .hero .slide img { position:absolute; right:2%; bottom:22px; height:52%; max-width:46%; object-fit:contain; }
+  .hero .txt { position:relative; z-index:2; padding:24px 18px 52px; max-width:60%; text-shadow:0 2px 8px rgba(0,0,0,.7); pointer-events:none; }
+  .hero .txt .cta { pointer-events:auto; }
   .hero h1 { margin:0; font-size:28px; line-height:1.15; color:var(--text); font-weight:700; }
   .hero h1 span { color:var(--gold); display:block; font-size:34px; font-weight:900; }
   .hero p { color:#f1e2cc; font-size:14px; margin:10px 0 16px; }
   .cta { display:inline-block; background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#2a1606; font-weight:bold; border:0; border-radius:14px; padding:12px 20px; font-size:15px; text-decoration:none; }
-  .htabs { position:absolute; left:0; right:0; bottom:10px; z-index:3; display:flex; gap:10px; overflow-x:auto; padding:0 12px; scrollbar-width:none; }
-  .htabs::-webkit-scrollbar { display:none; }
-  .htab { flex:0 0 auto; width:78px; background:rgba(14,6,6,.78); border:1px solid rgba(245,185,66,.6); border-radius:14px; padding:6px 4px; color:var(--text); font-family:inherit; font-size:11px; font-weight:bold; text-align:center; cursor:pointer; }
-  .htab img { width:100%; aspect-ratio:1/1; object-fit:cover; border-radius:10px; display:block; margin-bottom:4px; }
+  .dots { position:absolute; left:50%; transform:translateX(-50%); bottom:12px; z-index:3; display:flex; align-items:center; gap:8px; padding:5px 9px; border-radius:20px; background:rgba(14,6,6,.45); }
+  .dot { width:8px; height:8px; padding:0; border:0; border-radius:50%; background:rgba(255,246,230,.35); cursor:pointer; transition:width .25s, background .25s; }
+  .dot.on { width:22px; border-radius:5px; background:var(--gold); }
 
   .movbar { display:none; margin:0 12px 10px; background:#24100c; border:1px solid rgba(245,185,66,.4); border-radius:16px; padding:12px; font-size:14px; line-height:1.5; }
   .movbar b { color:var(--gold); }
@@ -178,13 +181,13 @@
 </header>
 
 <section class="hero">
+  <div class="slides" id="heroSlides" aria-label="Category highlights, swipe sideways"></div>
   <div class="txt">
     <h1>Enjoy the Movie...<span>With Great Snacks!</span></h1>
     <p>Order your favourite snacks easily at Shafaz Grand Canteen.</p>
     <a class="cta" href="#menu-top">Order Now &rarr;</a>
   </div>
-  <img class="pic" src="hero.png" alt="" onerror="this.style.display='none'">
-  <div class="htabs" id="heroTabs"></div>
+  <div class="dots" id="heroDots"></div>
 </section>
 
 <div class="movbar" id="seatBar"></div>
@@ -479,20 +482,34 @@ function renderMovieBar() {
 $('movBar').addEventListener('click', (e) => { if (e.target.id === 'pickMovie') openMoviePicker(); });
 setInterval(renderMovieBar, 30000);
 
-// ---------- Banner tabs (auto-scrolling) ----------
-$('heroTabs').innerHTML = SECTIONS.map(sec =>
-  `<button class="htab" data-cat="${esc(sec)}"><img src="${CAT_IMAGES[sec]}" alt="" onerror="this.src='shafaz-logo.png'">${esc(sec)}</button>`).join('');
-(function autoScrollTabs() {
-  const strip = $('heroTabs');
-  let hold = false, timer = null;
-  const pause = () => { hold = true; clearTimeout(timer); timer = setTimeout(() => { hold = false; }, 3000); };
-  ['touchstart', 'mousedown', 'wheel'].forEach(ev => strip.addEventListener(ev, pause, { passive: true }));
-  setInterval(() => {
-    if (hold) return;
-    const max = strip.scrollWidth - strip.clientWidth;
-    if (max <= 0) return;
-    strip.scrollLeft = strip.scrollLeft >= max - 2 ? 0 : strip.scrollLeft + 1;
-  }, 30);
+// ---------- Banner: swipeable category photos with dots ----------
+// Popcorn first, then one slide per category in the order they are swiped.
+const HERO_CATS = ['Popcorn', 'Ice Creams', 'Hot Snacks', 'Cold Drinks', 'Carbonated Drinks', 'Lays (Chips)']
+  .filter(c => SECTIONS.includes(c));
+const HERO_SLIDES = HERO_CATS.map((cat, i) => ({ cat, img: i === 0 ? 'hero.png' : CAT_IMAGES[cat] }));
+
+$('heroSlides').innerHTML = HERO_SLIDES.map(s =>
+  `<div class="slide"><img src="${s.img}" alt="${esc(s.cat)}" onerror="this.src='shafaz-logo.png'"></div>`).join('');
+$('heroDots').innerHTML = HERO_SLIDES.map((s, i) =>
+  `<button class="dot${i === 0 ? ' on' : ''}" data-i="${i}" aria-label="Show ${esc(s.cat)}"></button>`).join('');
+
+(function heroCarousel() {
+  const track = $('heroSlides');
+  const dots = Array.from($('heroDots').children);
+  const go = (i) => {
+    i = Math.max(0, Math.min(HERO_SLIDES.length - 1, i));
+    track.scrollTo({ left: i * track.clientWidth, behavior: 'smooth' });
+  };
+  const sync = () => {
+    const i = Math.round(track.scrollLeft / Math.max(1, track.clientWidth));
+    dots.forEach((d, j) => d.classList.toggle('on', j === i));
+  };
+  track.addEventListener('scroll', sync, { passive: true });
+  $('heroDots').addEventListener('click', (e) => {
+    const d = e.target.closest('[data-i]');
+    if (d) go(Number(d.dataset.i));
+  });
+  window.addEventListener('resize', sync);
 })();
 
 // ---------- Products ----------
@@ -568,7 +585,6 @@ function selectCat(c) {
   renderPanel(true);
 }
 $('cats').addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) selectCat(b.dataset.cat); });
-$('heroTabs').addEventListener('click', (e) => { const b = e.target.closest('[data-cat]'); if (b) selectCat(b.dataset.cat); });
 $('q').addEventListener('input', () => renderPanel(false));
 $('inStock').addEventListener('change', () => renderPanel(false));
 $('priceF').addEventListener('change', () => renderPanel(false));
