@@ -36,19 +36,33 @@
   .badge { position:absolute; top:-4px; right:-6px; background:var(--red); color:#fff; border-radius:50%; font-size:11px; min-width:18px; height:18px; line-height:18px; text-align:center; font-weight:bold; display:none; }
   .pill { background:var(--gold); color:#2a1606; border:0; border-radius:20px; padding:8px 12px; font-weight:bold; font-size:13px; text-decoration:none; }
 
-  /* Banner: swipeable category photos + dots */
-  .hero { position:relative; margin:12px; border-radius:20px; overflow:hidden; min-height:440px; background:#1a0b0b; border:1px solid rgba(245,185,66,.3); }
-  .hero .slides { position:absolute; inset:0; z-index:0; display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
+  /* Banner: tagline on top, product photo in the middle, Order Now at the bottom */
+  .hero { position:relative; margin:12px; border-radius:20px; overflow:hidden;
+    display:flex; flex-direction:column; align-items:center; justify-content:space-between;
+    gap:6px; padding:16px 14px 18px; text-align:center;
+    background:#1a0b0b url('theatre.png') center center/cover no-repeat;
+    border:1px solid rgba(245,185,66,.3); }
+  .hero::before { content:""; position:absolute; inset:0; z-index:0;
+    background:linear-gradient(180deg, rgba(14,6,6,.72) 0%, rgba(14,6,6,.35) 45%, rgba(14,6,6,.88) 100%); }
+  /* 1. Tagline PNG — very top, large and prominent */
+  .hero .tag { position:relative; z-index:2; display:block; width:min(94%, 560px); height:auto;
+    filter:drop-shadow(0 6px 16px rgba(0,0,0,.65)); }
+  .hero .slides { position:relative; z-index:2; width:100%; height:clamp(200px, 46vw, 300px);
+    display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory;
+    scrollbar-width:none; -webkit-overflow-scrolling:touch; }
   .hero .slides::-webkit-scrollbar { display:none; }
-  .hero .slide { position:relative; flex:0 0 100%; width:100%; scroll-snap-align:center; scroll-snap-stop:always; background:#1a0b0b url('theatre.png') center center/cover no-repeat; }
-  .hero .slide::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(14,6,6,.82) 0%, rgba(14,6,6,.4) 50%, rgba(14,6,6,0) 100%); }
-  /* Picture sits in the bottom-right corner and is shown big */
-  .hero .slide img { position:absolute; right:0; bottom:0; height:50%; width:auto; max-width:52%; object-fit:contain; object-position:right bottom; }
-  .hero .txt { position:relative; z-index:2; padding:24px 18px 52px; max-width:46%; text-shadow:0 2px 8px rgba(0,0,0,.7); pointer-events:none; }
-  .hero .txt .cta { pointer-events:auto; }
-  .hero h1 { margin:0; font-size:28px; line-height:1.15; color:var(--text); font-weight:700; }
-  .hero h1 span { color:var(--gold); display:block; font-size:34px; font-weight:900; }
-  .hero p { color:#f1e2cc; font-size:14px; margin:10px 0 16px; }
+  .hero .slide { position:relative; flex:0 0 100%; width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    scroll-snap-align:center; scroll-snap-stop:always; }
+  /* 2. Product photo — middle, noticeably bigger than before */
+  .hero .slide img { display:block; width:100%; height:100%; object-fit:contain;
+    filter:drop-shadow(0 12px 22px rgba(0,0,0,.6)); }
+  .hero .dots { position:relative; left:auto; bottom:auto; }
+  /* 3. Order Now — bottom */
+  .hero .cta { position:relative; z-index:2; display:inline-block;
+    background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#2a1606; font-weight:900;
+    border-radius:999px; padding:14px 46px; font-size:17px; text-decoration:none;
+    box-shadow:0 8px 20px rgba(0,0,0,.45); }
   .cta { display:inline-block; background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#2a1606; font-weight:bold; border:0; border-radius:14px; padding:12px 20px; font-size:15px; text-decoration:none; }
   .dots { position:absolute; left:16px; bottom:14px; z-index:3; display:flex; align-items:center; gap:8px; padding:5px 9px; border-radius:20px; background:rgba(14,6,6,.45); }
   .dot { width:8px; height:8px; padding:0; border:0; border-radius:50%; background:rgba(255,246,230,.35); cursor:pointer; transition:width .25s, background .25s; }
@@ -182,13 +196,10 @@
 </header>
 
 <section class="hero">
+  <img class="tag" src="hero-tagline.png" alt="Enjoy the Movie... With Great Snacks!">
   <div class="slides" id="heroSlides" aria-label="Category highlights, swipe sideways"></div>
-  <div class="txt">
-    <h1>Enjoy the Movie...<span>With Great Snacks!</span></h1>
-    <p>Order your favourite snacks easily at Shafaz Grand Canteen.</p>
-    <a class="cta" href="#menu-top">Order Now &rarr;</a>
-  </div>
   <div class="dots" id="heroDots"></div>
+  <a class="cta" href="#menu-top">Order Now &rarr;</a>
 </section>
 
 <div class="movbar" id="seatBar"></div>
@@ -483,7 +494,7 @@ function renderMovieBar() {
 $('movBar').addEventListener('click', (e) => { if (e.target.id === 'pickMovie') openMoviePicker(); });
 setInterval(renderMovieBar, 30000);
 
-// ---------- Banner: swipeable category photos with dots ----------
+// ---------- Banner: tagline, product photos, Order Now ----------
 // Popcorn first, then one slide per category in the order they are swiped.
 const HERO_CATS = ['Popcorn', 'Ice Creams', 'Hot Snacks', 'Cold Drinks', 'Carbonated Drinks', 'Lays (Chips)']
   .filter(c => SECTIONS.includes(c));
