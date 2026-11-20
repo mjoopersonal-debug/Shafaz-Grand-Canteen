@@ -320,12 +320,12 @@ const auth = getAuth(app);
 const SECTIONS = ['Cold Drinks', 'Hot Snacks', 'Lays (Chips)', 'Carbonated Drinks', 'Popcorn', 'Ice Creams'];
 const DRINK_SECTIONS = ['Cold Drinks', 'Carbonated Drinks'];
 const CAT_IMAGES = {
-  'Cold Drinks': 'cat-cold-drinks.png',
-  'Hot Snacks': 'cat-snacks.png',
-  'Lays (Chips)': 'cat-lays.png',
-  'Carbonated Drinks': 'cat-carbonated.png',
-  'Popcorn': 'cat-popcorn.png',
-  'Ice Creams': 'cat-icecream.png'
+  'Cold Drinks': 'cat-cold-drinks-v2.webp',
+  'Hot Snacks': 'cat-snacks-v2.webp',
+  'Lays (Chips)': 'cat-lays-v2.webp',
+  'Carbonated Drinks': 'cat-carbonated-v2.webp',
+  'Popcorn': 'cat-popcorn-v2.webp',
+  'Ice Creams': 'cat-icecream-v2.webp'
 };
 const HALL = 'Hall entrance delivery';
 const TIP = 10;            // delivery boy tip, added to every order
@@ -486,7 +486,7 @@ setInterval(renderMovieBar, 30000);
 // Popcorn first, then one slide per category in the order they are swiped.
 const HERO_CATS = ['Popcorn', 'Ice Creams', 'Hot Snacks', 'Cold Drinks', 'Carbonated Drinks', 'Lays (Chips)']
   .filter(c => SECTIONS.includes(c));
-const HERO_SLIDES = HERO_CATS.map((cat, i) => ({ cat, img: i === 0 ? 'hero.png' : CAT_IMAGES[cat] }));
+const HERO_SLIDES = HERO_CATS.map((cat, i) => ({ cat, img: i === 0 ? 'hero-v2.webp' : CAT_IMAGES[cat] }));
 
 $('heroSlides').innerHTML = HERO_SLIDES.map(s =>
   `<div class="slide"><img src="${s.img}" alt="${esc(s.cat)}" onerror="this.src='shafaz-logo.png'"></div>`).join('');
