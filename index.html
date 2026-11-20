@@ -37,19 +37,20 @@
   .pill { background:var(--gold); color:#2a1606; border:0; border-radius:20px; padding:8px 12px; font-weight:bold; font-size:13px; text-decoration:none; }
 
   /* Banner: swipeable category photos + dots */
-  .hero { position:relative; margin:12px; border-radius:20px; overflow:hidden; min-height:400px; background:#1a0b0b; border:1px solid rgba(245,185,66,.3); }
+  .hero { position:relative; margin:12px; border-radius:20px; overflow:hidden; min-height:440px; background:#1a0b0b; border:1px solid rgba(245,185,66,.3); }
   .hero .slides { position:absolute; inset:0; z-index:0; display:flex; overflow-x:auto; overflow-y:hidden; scroll-snap-type:x mandatory; scrollbar-width:none; -webkit-overflow-scrolling:touch; }
   .hero .slides::-webkit-scrollbar { display:none; }
   .hero .slide { position:relative; flex:0 0 100%; width:100%; scroll-snap-align:center; scroll-snap-stop:always; background:#1a0b0b url('theatre.png') center center/cover no-repeat; }
   .hero .slide::before { content:""; position:absolute; inset:0; background:linear-gradient(90deg, rgba(14,6,6,.82) 0%, rgba(14,6,6,.4) 50%, rgba(14,6,6,0) 100%); }
-  .hero .slide img { position:absolute; right:0; bottom:56px; height:36%; width:auto; max-width:54%; object-fit:contain; object-position:right bottom; }
+  /* Picture sits in the bottom-right corner and is shown big */
+  .hero .slide img { position:absolute; right:0; bottom:0; height:50%; width:auto; max-width:52%; object-fit:contain; object-position:right bottom; }
   .hero .txt { position:relative; z-index:2; padding:24px 18px 52px; max-width:46%; text-shadow:0 2px 8px rgba(0,0,0,.7); pointer-events:none; }
   .hero .txt .cta { pointer-events:auto; }
   .hero h1 { margin:0; font-size:28px; line-height:1.15; color:var(--text); font-weight:700; }
   .hero h1 span { color:var(--gold); display:block; font-size:34px; font-weight:900; }
   .hero p { color:#f1e2cc; font-size:14px; margin:10px 0 16px; }
   .cta { display:inline-block; background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#2a1606; font-weight:bold; border:0; border-radius:14px; padding:12px 20px; font-size:15px; text-decoration:none; }
-  .dots { position:absolute; left:50%; transform:translateX(-50%); bottom:12px; z-index:3; display:flex; align-items:center; gap:8px; padding:5px 9px; border-radius:20px; background:rgba(14,6,6,.45); }
+  .dots { position:absolute; left:16px; bottom:14px; z-index:3; display:flex; align-items:center; gap:8px; padding:5px 9px; border-radius:20px; background:rgba(14,6,6,.45); }
   .dot { width:8px; height:8px; padding:0; border:0; border-radius:50%; background:rgba(255,246,230,.35); cursor:pointer; transition:width .25s, background .25s; }
   .dot.on { width:22px; border-radius:5px; background:var(--gold); }
 
