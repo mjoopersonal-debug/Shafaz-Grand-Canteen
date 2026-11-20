@@ -48,6 +48,10 @@
   .hero h1 { margin:0; font-size:19px; line-height:1.2; color:var(--text); font-weight:700; }
   .hero h1 span { color:var(--gold); display:block; font-size:25px; line-height:1.15; font-weight:900; }
   .hero p { display:none; }
+  .hero .taglineWrap { display:contents; }
+  .hero .tagline { display:none; width:100%; max-width:290px; height:auto; margin:0 0 6px; filter:drop-shadow(0 3px 8px rgba(0,0,0,.6)); }
+  .hero .txt.hasTag .tagline { display:block; }
+  .hero .txt.hasTag h1 { display:none; }
   .cta { display:inline-block; margin-top:8px; background:linear-gradient(135deg,var(--gold2),var(--gold)); color:#2a1606; font-weight:bold; border:0; border-radius:10px; padding:6px 14px; font-size:15px; text-decoration:none; }
   .dots { position:absolute; left:50%; transform:translateX(-50%); bottom:3px; z-index:3; display:flex; align-items:center; gap:5px; padding:2px 6px; border-radius:10px; background:rgba(14,6,6,.45); }
   .dot { width:5px; height:5px; padding:0; border:0; border-radius:50%; background:rgba(255,246,230,.4); cursor:pointer; transition:width .25s, background .25s; }
@@ -183,6 +187,11 @@
 <section class="hero">
   <div class="slides" id="heroSlides" aria-label="Category highlights, swipe sideways"></div>
   <div class="txt">
+    <picture class="taglineWrap">
+      <source srcset="hero-tagline.webp" type="image/webp">
+      <img class="tagline" src="hero-tagline.png" alt="Enjoy the Movie... With Great Snacks!"
+           onload="this.closest('.txt').classList.add('hasTag')" onerror="this.remove()">
+    </picture>
     <h1>Enjoy the Movie...<span>With Great Snacks!</span></h1>
     <p>Order your favourite snacks easily at Shafaz Grand Canteen.</p>
     <a class="cta" href="#menu-top">Order Now &rarr;</a>
