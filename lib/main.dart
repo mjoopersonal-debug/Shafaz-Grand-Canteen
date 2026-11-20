@@ -24,7 +24,7 @@ final GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   FlutterForegroundTask.initCommunicationPort();
-  KeepAlive.init();
+  OrderKeepAlive.init();
   String? startError;
   try {
     await Firebase.initializeApp();
@@ -214,7 +214,7 @@ class _HomeState extends State<HomeScreen> {
   void initState() {
     super.initState();
     // Keeps the app alive in the background so new-order alarms still ring
-    AppAlarm.setup().then((_) => KeepAlive.start());
+    AppAlarm.setup().then((_) => OrderKeepAlive.start());
     _sub = FirebaseFirestore.instance
         .collection('orders')
         .where('status', isEqualTo: 'Pending')
@@ -282,7 +282,7 @@ class _HomeState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
-              await KeepAlive.stop();
+              await OrderKeepAlive.stop();
               await FirebaseAuth.instance.signOut();
             },
           ),
