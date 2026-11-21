@@ -396,7 +396,7 @@
     <div class="rule"><b>Ordering after the movie has started</b>Please wait near the doorstep. Otherwise our staff have to walk past other viewers to deliver your food, which disturbs them.</div>
     <div class="rule"><b>Side seats and middle seats</b>If you are in a side seat, that is not an issue. If you are in the middle seats, please come up to the door to collect your order once the show starts, so that nobody is disturbed. The items will be brought right up to the door.</div>
     <div class="rule"><b>Minimum order</b>The minimum order value is ₹50.</div>
-    <div class="rule"><b>Shafaz Points</b>Sign in with Google and you earn 1 point for every product you buy. Once you reach 100 points, you can redeem them for a free popcorn.</div>
+    <div class="rule"><b>Shafaz Points</b>Sign in with Google and you earn 1 point for every product you buy once your order is delivered. Once you reach 100 points, you can redeem them for a free popcorn.</div>
     <button class="primary" id="rulesOk">I understand</button>
   </div>
 </div>
@@ -616,7 +616,7 @@ document.addEventListener('click', (e) => {
 function renderPoints() {
   const bar = $('ptsBar');
   if (!currentUser) {
-    bar.innerHTML = `⭐ <b>Shafaz Points</b><br>Sign in with Google to earn 1 point for every product you buy.
+    bar.innerHTML = `⭐ <b>Shafaz Points</b><br>Sign in with Google to earn 1 point for every product you buy once delivered.
       Reach ${REDEEM_POINTS} points and get a free popcorn.<br><button class="gbtn" data-signin="1">Sign in with Google</button>`;
     return;
   }
@@ -1071,8 +1071,8 @@ function renderCart() {
   const qtyTotal = lines.reduce((s, l) => s + l.qty, 0);
   const earn = Math.min(MAX_EARN, Math.max(0, qtyTotal - (c.freeId ? 1 : 0)));
   $('cartPts').innerHTML = !lines.length ? '' : (currentUser
-    ? `<div class="cartpts">⭐ You will earn <b>${earn}</b> Shafaz Points with this order.</div>`
-    : `<div class="cartpts">⭐ Sign in with Google to earn <b>${earn}</b> Shafaz Points with this order.<br><button class="gbtn" data-signin="1">Sign in with Google</button></div>`);
+    ? `<div class="cartpts">⭐ You will earn <b>${earn}</b> Shafaz Points once your order is delivered.</div>`
+    : `<div class="cartpts">⭐ Sign in with Google to earn <b>${earn}</b> Shafaz Points once your order is delivered.<br><button class="gbtn" data-signin="1">Sign in with Google</button></div>`);
 
   renderDelivery();
   updatePayLinks();
@@ -1231,27 +1231,18 @@ $('send').addEventListener('click', async () => {
     const stBefore = deliveryState();
     const counterRef = doc(db, 'counters', 'orders');
     const orderRef = doc(collection(db, 'orders'));
-    const custRef = user ? doc(db, 'customers', user.uid) : null;
     let pickupNo = '';
-    let finalPoints = 0;
 
     await runTransaction(db, async (tx) => {
       const refs = uniqueProdIds.map(id => doc(db, 'products', id));
       const snaps = await Promise.all(refs.map(r => tx.get(r)));
       const cs = await tx.get(counterRef);
-      const ps = custRef ? await tx.get(custRef) : null;
       snaps.forEach((s, i) => {
         const pid = uniqueProdIds[i];
         const need = reqQtyByProd[pid];
         const have = s.exists() ? Number(s.data().stock || 0) : 0;
         if (have < need) throw new Error(`Only ${have} of ${prodNameById[pid]} left.`);
       });
-      let cur = 0;
-      if (custRef) {
-        cur = ps.exists() ? Number(ps.data().points) || 0 : 0;
-        if (redeem && cur < REDEEM_POINTS) throw new Error('Not enough Shafaz Points.');
-        finalPoints = cur - (redeem ? REDEEM_POINTS : 0) + earned;
-      }
       const n = cs.exists() ? cs.data().n + 1 : 1001;
       pickupNo = 'SGC-' + n;
       snaps.forEach((s, i) => {
@@ -1263,10 +1254,6 @@ $('send').addEventListener('click', async () => {
         });
       });
       if (cs.exists()) tx.update(counterRef, { n }); else tx.set(counterRef, { n });
-      if (custRef) {
-        const prof = { name: (user.displayName || '').slice(0, 60), email: (user.email || '').slice(0, 100), points: finalPoints };
-        if (ps.exists()) tx.update(custRef, prof); else tx.set(custRef, prof);
-      }
       tx.set(orderRef, {
         seat, name, items, total: c.total, paymentPhoto, status: 'Pending', time: serverTimestamp(),
         pickupNo, delivery: dlv, movie,
@@ -1304,10 +1291,9 @@ $('send').addEventListener('click', async () => {
       text = 'Your order is being prepared. Please keep your pickup number ready.';
     }
     $('deliveryMsg').textContent = text;
-    if (user) {
+    if (user && earned > 0) {
       $('pointsMsg').style.display = 'block';
-      $('pointsMsg').textContent = '⭐ You earned ' + earned + ' Shafaz Points. You now have ' + finalPoints + ' points.' +
-        (redeem ? ' Your free popcorn was applied.' : '');
+      $('pointsMsg').textContent = '⭐ You will earn ' + earned + ' Shafaz Points once your order is delivered.';
     } else {
       $('pointsMsg').style.display = 'none';
     }
