@@ -285,6 +285,13 @@
   .opt input { margin-top:3px; }
   .dnote { color:#ffb24d; font-size:13px; margin-top:8px; font-weight:bold; }
   .cartpts { background:#24100c; border:1px dashed var(--line); border-radius:12px; padding:10px; margin-top:10px; font-size:13px; color:var(--gold2); }
+  .tipbox { background:#24100c; border:1px solid var(--line); border-radius:12px; padding:10px 12px; margin-top:10px; }
+  .tipbox .tiphead { margin:0; font-size:14px; }
+  .tiprow { display:flex; align-items:center; gap:8px; margin-top:6px; }
+  .tiprow .rupee { color:var(--gold2); font-weight:900; font-size:17px; }
+  .tipbox input { flex:1; min-width:0; margin:0; padding:10px 12px; font-size:16px; border:1px solid var(--line); border-radius:10px; background:#1a0b0b; color:var(--text); font-family:inherit; }
+  .tipbox input::-webkit-outer-spin-button, .tipbox input::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+  .tipbox input[type=number] { -moz-appearance:textfield; appearance:textfield; }
   .movbtn { display:block; width:100%; text-align:left; margin-top:8px; padding:12px; border-radius:12px; border:1px solid var(--line); background:#24100c; color:var(--text); font-size:15px; }
   .payrow { display:flex; gap:14px; align-items:center; margin-top:14px; background:#24100c; border-radius:16px; padding:12px; }
   .payrow a.qrlink { display:block; flex-shrink:0; }
@@ -352,6 +359,7 @@
 <nav class="cats" id="cats"></nav>
 <div class="catpanel" id="catPanel"><div class="inner"></div></div>
 
+
 <section class="care" id="care">
   <h2>Customer care</h2>
   <p>Problem with your order, payment or delivery? Call or message us. Please keep your pickup number ready (for example SGC-1025).</p>
@@ -392,6 +400,16 @@
     <h3>Your order</h3>
     <div id="cartLines"></div>
     <div id="redeemBox"></div>
+
+    <div class="tipbox" id="tipBox">
+      <label class="tiphead" for="extraTip">Add a tip for the delivery boy (optional)</label>
+      <div class="tiprow">
+        <span class="rupee">₹</span>
+        <input id="extraTip" type="number" inputmode="numeric" min="0" max="500" step="1" placeholder="0">
+      </div>
+      <div class="hint">A ₹10 delivery charge is already included in your order. Add any amount you wish to give the delivery boy as a tip.</div>
+    </div>
+
     <div id="cartSum"></div>
     <div id="cartPts"></div>
 
@@ -469,7 +487,8 @@ const CAT_IMAGES = {
   'Ice Creams': 'cat-icecream-v3.webp'
 };
 const HALL = 'Hall entrance delivery';
-const TIP = 10;            // delivery charges , added to every order
+const DELIVERY_CHARGE = 10; // fixed delivery charge, added to every order
+const EXTRA_TIP_MAX = 500;  // most extra tip a customer can add for the delivery boy
 const MIN_ORDER = 50;      // minimum items value
 const REDEEM_POINTS = 100; // points for a free popcorn
 const MAX_EARN = 100;      // most points one order can earn
@@ -488,6 +507,7 @@ let openCat = null;
 let currentUser = null;
 let points = 0;
 let useRedeem = false;
+let extraTip = 0;
 let unsubPoints = null;
 const cart = {};
 const coldPref = {};
@@ -763,7 +783,7 @@ function canRedeem(lines) {
   return !!currentUser && points >= REDEEM_POINTS && lines.some(l => l.section === 'Popcorn');
 }
 
-// Works out items, free popcorn, tip and the final total
+// Works out items, free popcorn, delivery charge, extra tip and the final total
 function calc() {
   const lines = cartLines();
   const sub = lines.reduce((s, l) => s + l.qty * l.price, 0);
@@ -774,8 +794,9 @@ function calc() {
     discount = cheapest.price;
     freeId = cheapest.id;
   }
-  const tip = lines.length ? TIP : 0;
-  return { lines, sub, discount, freeId, tip, total: sub - discount + tip };
+  const charge = lines.length ? DELIVERY_CHARGE : 0;
+  const extra = lines.length ? extraTip : 0;
+  return { lines, sub, discount, freeId, charge, extraTip: extra, total: sub - discount + charge + extra };
 }
 
 function renderBar() {
@@ -808,6 +829,18 @@ function renderDelivery() {
 }
 $('deliveryBox').addEventListener('change', (e) => { if (e.target.name === 'dlv') delivery = e.target.value; });
 
+function renderSummary() {
+  const c = calc();
+  $('tipBox').style.display = c.lines.length ? 'block' : 'none';
+  $('cartSum').innerHTML = c.lines.length ? `
+    <div class="srow"><span>Items</span><span>₹${c.sub}</span></div>
+    ${c.discount ? `<div class="srow free"><span>Free popcorn (${REDEEM_POINTS} points)</span><span>−₹${c.discount}</span></div>` : ''}
+    <div class="srow"><span>Delivery charge</span><span>₹${c.charge}</span></div>
+    ${c.extraTip ? `<div class="srow"><span>Delivery boy tip</span><span>₹${c.extraTip}</span></div>` : ''}
+    <div class="total">Total: ₹${c.total}</div>
+    ${c.sub < MIN_ORDER ? `<div class="dnote">Minimum order amount is ₹${MIN_ORDER}. Add ₹${MIN_ORDER - c.sub} more to continue.</div>` : ''}` : '';
+}
+
 function renderCart() {
   const lines = cartLines();
   if (!canRedeem(lines)) useRedeem = false;
@@ -822,12 +855,7 @@ function renderCart() {
   $('redeemBox').innerHTML = canRedeem(lines)
     ? `<label class="opt"><input type="checkbox" id="useRedeem"${useRedeem ? ' checked' : ''}><span>Use ${REDEEM_POINTS} Shafaz Points for 1 free popcorn</span></label>` : '';
 
-  $('cartSum').innerHTML = lines.length ? `
-    <div class="srow"><span>Items</span><span>₹${c.sub}</span></div>
-    ${c.discount ? `<div class="srow free"><span>Free popcorn (${REDEEM_POINTS} points)</span><span>−₹${c.discount}</span></div>` : ''}
-    <div class="srow"><span>Delivery boy tip</span><span>₹${c.tip}</span></div>
-    <div class="total">Total: ₹${c.total}</div>
-    ${c.sub < MIN_ORDER ? `<div class="dnote">Minimum order amount is ₹${MIN_ORDER}. Add ₹${MIN_ORDER - c.sub} more to continue.</div>` : ''}` : '';
+  renderSummary();
 
   const qtyTotal = lines.reduce((s, l) => s + l.qty, 0);
   const earn = Math.min(MAX_EARN, Math.max(0, qtyTotal - (c.freeId ? 1 : 0)));
@@ -840,6 +868,17 @@ function renderCart() {
 }
 $('redeemBox').addEventListener('change', (e) => {
   if (e.target.id === 'useRedeem') { useRedeem = e.target.checked; renderCart(); }
+});
+
+// Extra tip the customer chooses to add for the delivery boy
+$('extraTip').addEventListener('input', () => {
+  const el = $('extraTip');
+  let v = Math.round(Number(el.value) || 0);
+  if (v < 0) { v = 0; el.value = ''; }
+  if (v > EXTRA_TIP_MAX) { v = EXTRA_TIP_MAX; el.value = String(v); }
+  extraTip = v;
+  renderSummary();
+  updatePayLinks();
 });
 $('cartLines').addEventListener('change', (e) => {
   const id = e.target.dataset && e.target.dataset.cold;
@@ -981,7 +1020,7 @@ $('send').addEventListener('click', async () => {
       tx.set(orderRef, {
         seat, name, items, total: c.total, paymentPhoto, status: 'Pending', time: serverTimestamp(),
         pickupNo, delivery: dlv, movie,
-        tip: c.tip, discount: c.discount,
+        tip: c.charge + c.extraTip, extraTip: c.extraTip, discount: c.discount,
         uid: user ? user.uid : '', email: user ? (user.email || '') : '',
         pointsUsed: redeem ? REDEEM_POINTS : 0, pointsEarned: earned
       });
@@ -990,6 +1029,8 @@ $('send').addEventListener('click', async () => {
     Object.keys(cart).forEach(k => delete cart[k]);
     Object.keys(coldPref).forEach(k => delete coldPref[k]);
     useRedeem = false;
+    extraTip = 0;
+    $('extraTip').value = '';
     $('cartPanel').style.display = 'none';
     $('bar').style.display = 'none';
     $('pickupNo').textContent = pickupNo;
