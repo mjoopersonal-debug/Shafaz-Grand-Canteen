@@ -94,6 +94,10 @@ class _OrderCard extends StatelessWidget {
     final photo = photos[it['id']];
     final cold = it['cold'];
     final free = (it['freeQty'] as num?)?.toInt() ?? 0;
+    final syrups = (it['syrups'] as List?)?.map((e) => e.toString()).toList() ?? const <String>[];
+    final toppings = (it['toppings'] as List?)?.map((e) => e.toString()).toList() ?? const <String>[];
+    final hasCustomField = it.containsKey('syrups') || it.containsKey('toppings');
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(
@@ -116,6 +120,21 @@ class _OrderCard extends StatelessWidget {
               children: [
                 Text(it['name'].toString(),
                     style: const TextStyle(color: textCol, fontSize: 16, fontWeight: FontWeight.w600)),
+                if (syrups.isNotEmpty)
+                  Text(
+                    'Syrups: ${syrups.join(', ')}',
+                    style: const TextStyle(color: gold, fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                if (toppings.isNotEmpty)
+                  Text(
+                    'Toppings: ${toppings.join(', ')}',
+                    style: const TextStyle(color: Colors.amberAccent, fontSize: 13, fontWeight: FontWeight.w600),
+                  ),
+                if (hasCustomField && syrups.isEmpty && toppings.isEmpty)
+                  const Text(
+                    'Plain (no syrup/topping)',
+                    style: TextStyle(color: mutedCol, fontSize: 13),
+                  ),
                 if (cold is bool)
                   Text(
                     cold ? 'COLD' : 'NOT COLD',
