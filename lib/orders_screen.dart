@@ -60,17 +60,21 @@ class OrdersScreen extends StatelessWidget {
                 .snapshots(),
             builder: (context, snap) {
               if (snap.hasError) {
-                return Center(child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Text('Error: ${snap.error}', textAlign: TextAlign.center),
-                ));
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Text('Error: ${snap.error}', textAlign: TextAlign.center),
+                  ),
+                );
               }
               if (!snap.hasData) return const Center(child: CircularProgressIndicator());
               final docs = snap.data!.docs.toList()
                 ..sort((a, b) => _timeOf(b.data() as Map<String, dynamic>)
                     .compareTo(_timeOf(a.data() as Map<String, dynamic>)));
               if (docs.isEmpty) {
-                return const Center(child: Text('No pending orders', style: TextStyle(color: mutedCol, fontSize: 16)));
+                return const Center(
+                  child: Text('No pending orders', style: TextStyle(color: mutedCol, fontSize: 16)),
+                );
               }
               return ListView.builder(
                 padding: const EdgeInsets.all(12),
@@ -85,13 +89,20 @@ class OrdersScreen extends StatelessWidget {
   }
 }
 
-class _OrderCard extends StatelessWidget {
+class _OrderCard extends StatefulWidget {
   final QueryDocumentSnapshot doc;
   final Map<String, Uint8List?> photos;
   const _OrderCard({required this.doc, required this.photos});
 
+  @override
+  State<_OrderCard> createState() => _OrderCardState();
+}
+
+class _OrderCardState extends State<_OrderCard> {
+  bool _busy = false;
+
   Widget _itemRow(Map<String, dynamic> it) {
-    final photo = photos[it['id']];
+    final photo = widget.photos[it['id']];
     final cold = it['cold'];
     final free = (it['freeQty'] as num?)?.toInt() ?? 0;
     final syrups = (it['syrups'] as List?)?.map((e) => e.toString()).toList() ?? const <String>[];
@@ -118,8 +129,10 @@ class _OrderCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(it['name'].toString(),
-                    style: const TextStyle(color: textCol, fontSize: 16, fontWeight: FontWeight.w600)),
+                Text(
+                  it['name'].toString(),
+                  style: const TextStyle(color: textCol, fontSize: 16, fontWeight: FontWeight.w600),
+                ),
                 if (syrups.isNotEmpty)
                   Text(
                     'Syrups: ${syrups.join(', ')}',
@@ -145,20 +158,107 @@ class _OrderCard extends StatelessWidget {
                     ),
                   ),
                 if (free > 0)
-                  Text('$free FREE (Shafaz Points)',
-                      style: const TextStyle(color: Colors.greenAccent, fontSize: 13, fontWeight: FontWeight.bold)),
+                  Text(
+                    '$free FREE (Shafaz Points)',
+                    style: const TextStyle(color: Colors.greenAccent, fontSize: 13, fontWeight: FontWeight.bold),
+                  ),
               ],
             ),
           ),
-          Text('x${it['qty']}', style: const TextStyle(color: gold, fontSize: 18, fontWeight: FontWeight.bold)),
+          Text(
+            'x${it['qty']}',
+            style: const TextStyle(color: gold, fontSize: 18, fontWeight: FontWeight.bold),
+          ),
         ],
       ),
     );
   }
 
+  Future<void> _markInvalid(BuildContext context, Map<String, dynamic> d) async {
+    final pickup = (d['pickupNo'] ?? '').toString();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('This order is not valid?'),
+        content: Text(
+          pickup.isNotEmpty
+              ? 'Mark order $pickup as not valid? It will be cancelled and no Shafaz Points will be added.'
+              : 'Mark this order as not valid? It will be cancelled and no Shafaz Points will be added.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Yes, not valid'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+
+    setState(() => _busy = true);
+    try {
+      await widget.doc.reference.update({
+        'status': 'Invalid',
+        'invalidAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _markDelivered(BuildContext context, Map<String, dynamic> d) async {
+    setState(() => _busy = true);
+    try {
+      final uid = (d['uid'] ?? '').toString();
+      final earned = (d['pointsEarned'] as num?)?.toInt() ?? 0;
+
+      await FirebaseFirestore.instance.runTransaction((tx) async {
+        final fresh = await tx.get(widget.doc.reference);
+        if (!fresh.exists) return;
+        final data = fresh.data() as Map<String, dynamic>;
+        if (data['status'] == 'Delivered') return;
+
+        if (uid.isNotEmpty && earned > 0) {
+          final custRef = FirebaseFirestore.instance.collection('customers').doc(uid);
+          final custSnap = await tx.get(custRef);
+          final curPts = custSnap.exists
+              ? ((custSnap.data() as Map<String, dynamic>)['points'] as num?)?.toInt() ?? 0
+              : 0;
+          final nextPts = (curPts + earned).clamp(0, 1000000);
+          tx.set(
+            custRef,
+            {
+              'name': (data['name'] ?? '').toString().characters.take(60).toString(),
+              'email': (data['email'] ?? '').toString().characters.take(100).toString(),
+              'points': nextPts,
+            },
+            SetOptions(merge: true),
+          );
+        }
+
+        tx.update(widget.doc.reference, {
+          'status': 'Delivered',
+          'deliveredAt': FieldValue.serverTimestamp(),
+        });
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final d = doc.data() as Map<String, dynamic>;
+    final d = widget.doc.data() as Map<String, dynamic>;
     final seat = (d['seat'] ?? '').toString();
     final pickup = (d['pickupNo'] ?? '').toString();
     final who = (d['name'] ?? '').toString();
@@ -186,8 +286,10 @@ class _OrderCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                   decoration: BoxDecoration(color: gold, borderRadius: BorderRadius.circular(12)),
-                  child: Text('Seat $seat',
-                      style: const TextStyle(color: Color(0xFF2A1606), fontSize: 20, fontWeight: FontWeight.bold)),
+                  child: Text(
+                    'Seat $seat',
+                    style: const TextStyle(color: Color(0xFF2A1606), fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
                 ),
                 const Spacer(),
                 Text(timeText, style: const TextStyle(color: mutedCol)),
@@ -204,8 +306,10 @@ class _OrderCard extends StatelessWidget {
                 margin: const EdgeInsets.only(top: 8),
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                 decoration: BoxDecoration(color: Colors.green, borderRadius: BorderRadius.circular(10)),
-                child: Text('FREE POPCORN · $used points used',
-                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                child: Text(
+                  'FREE POPCORN · $used points used',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13),
+                ),
               ),
             const SizedBox(height: 12),
             for (final raw in items) _itemRow(raw as Map<String, dynamic>),
@@ -214,7 +318,10 @@ class _OrderCard extends StatelessWidget {
               Text('Delivery boy tip: ₹$tip', style: const TextStyle(color: textCol, fontSize: 14)),
             Text('Total: ₹$total', style: const TextStyle(color: gold, fontSize: 18, fontWeight: FontWeight.bold)),
             if (earned > 0)
-              Text('Customer earned $earned Shafaz Points', style: const TextStyle(color: mutedCol, fontSize: 12)),
+              Text(
+                'Points on delivery: +$earned Shafaz Points',
+                style: const TextStyle(color: mutedCol, fontSize: 12),
+              ),
             if (pay != null) ...[
               const SizedBox(height: 10),
               const Text('Payment screenshot (tap to view)', style: TextStyle(color: mutedCol, fontSize: 12)),
@@ -227,14 +334,24 @@ class _OrderCard extends StatelessWidget {
                 ),
               ),
             ],
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.redAccent,
+                  side: const BorderSide(color: Colors.redAccent),
+                ),
+                onPressed: _busy ? null : () => _markInvalid(context, d),
+                child: const Text('This order is not valid'),
+              ),
+            ),
+            const SizedBox(height: 8),
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: () async {
-                  await doc.reference.update({'status': 'Delivered'});
-                },
-                child: const Text('Mark delivered'),
+                onPressed: _busy ? null : () => _markDelivered(context, d),
+                child: Text(_busy ? 'Please wait...' : 'Mark delivered'),
               ),
             ),
           ],
